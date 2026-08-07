@@ -40,7 +40,7 @@ A single-user web application to track job applications through their lifecycle,
 | Backend framework     | Laravel 13.x                                                                               | REST API only, no Blade views for app functionality                                                  |
 | Frontend              | React 19 + Vite                                                                            | Separate SPA, no Next.js, consumes REST API only                                                     |
 | API auth              | Laravel Sanctum (SPA authentication, cookie-based)                                         | Standard Laravel-recommended approach for a first-party SPA talking to its own API                   |
-| Database              | MySQL 8 (or PostgreSQL — decide before scaffolding)                                        |                                                                                                      |
+| Database              | PostgreSQL 18                                                                              | See §10.2                                                                                            |
 | Cache / Queue backend | Redis                                                                                      | Used for both cache driver and queue connection                                                      |
 | Queues                | Laravel Jobs + `redis` queue driver, Horizon for monitoring                                | Reminder dispatch, notification sending, any file post-processing                                    |
 | Scheduling            | Laravel Task Scheduling (`routes/console.php` / scheduled commands) via cron on the server | Daily staleness scan                                                                                 |
@@ -75,7 +75,7 @@ A single-user web application to track job applications through their lifecycle,
                      ┌──────────────────┼───────────────────┐
                      │                  │                   │
               ┌──────▼─────┐    ┌───────▼───────┐   ┌───────▼───────┐
-              │   MySQL     │    │     Redis      │   │      S3        │
+              │ PostgreSQL  │    │     Redis      │   │      S3        │
               │ (app data)  │    │ (cache+queue)  │   │  (attachments)  │
               └────────────┘    └───────┬───────┘   └────────────────┘
                                          │
@@ -96,7 +96,7 @@ which queries stale applications and dispatches reminder Jobs.
 
 ## 9. System design notes
 
-- **Repo layout**: single monorepo with `/backend` (Laravel) and `/frontend` (React/Vite), or two repos — decide before scaffolding; monorepo is simpler for a solo single-user project and keeps Claude Code context in one place.
+- **Repo layout**: single monorepo with `/backend` (Laravel) and `/frontend` (React/Vite) — see §10.1.
 - **Auth flow**: Sanctum SPA authentication (session cookie + CSRF token), not token-based API auth, since the React app is first-party and same-origin (or configured as a trusted origin) — this is the Laravel-recommended pattern for a first-party SPA, not full OAuth/Passport.
 - **Status pipeline** stored as an enum-backed column, not free text, with a dedicated `ApplicationStatusHistory` table for the audit trail.
 - **Staleness definition**: configurable threshold (e.g. no status change in 10 days while not already Rejected/Withdrawn/Offer) — kept as config, not hardcoded, so it's easy to tune.
@@ -104,9 +104,14 @@ which queries stale applications and dispatches reminder Jobs.
 - **File storage path convention**: `applications/{application_id}/{uuid}-{original_filename}` on the `s3` disk, with presigned GET URLs generated on demand rather than public bucket access.
 - **Deployment target for V1**: single EC2 instance (or Forge-provisioned) is enough — ECS/Fargate is a stretch goal, not a requirement, since infra complexity isn't the point of this particular project.
 
-## 10. Open decisions to confirm before scaffolding
+## 10. Decisions (resolved at scaffold time)
 
-1. Monorepo vs. two repos for backend/frontend
-2. MySQL vs. PostgreSQL
-3. Deploy target for V1: plain EC2, Forge, or ECS Fargate straight away
-4. Whether Horizon is worth adding at MVP stage or deferred to V1 (I'd lean: add it early since it's cheap and makes queue behavior visible while learning)
+1. **Repo layout → monorepo.** Single git repo with `/backend` (Laravel) and `/frontend` (React/Vite). Keeps the API and its consumer in one Claude Code context so contract changes stay in sync, and avoids doubling the CI/deploy setup for a solo project.
+2. **Database → PostgreSQL 18.** Preferred over MySQL 8 on general merit; DDEV supports `postgres:18` directly and RDS supports it equally well for deploy, so there was no cost to taking the preference.
+3. **Deploy target → still open, deliberately deferred.** Nothing about the local build depends on it, and deciding between plain EC2, Forge, and Fargate is better done once there is something to deploy. Revisit before V1 ships.
+4. **Horizon → deferred to V1, not MVP.** The earlier lean was to add it early for queue visibility, and that reasoning still holds — but it belongs with the queue work itself (switching `QUEUE_CONNECTION` to `redis`, writing the first Job), not with the scaffold. Adding it against a queue nothing dispatches to would teach nothing.
+
+**Also decided, though not in the original list:**
+
+5. **Dev environment → DDEV.** Docker-based, no host PHP install, and already in daily use on this machine. Provides PHP 8.4, Composer, Node 24, Postgres 18, Redis (add-on), and Mailpit. Chosen over Laravel Sail, which is a thinner tool that would have meant learning a second container workflow for no gain. Note: this project's Mailpit runs on 8035/8036 rather than the DDEV default, because a standalone Mailpit container on the host already holds 8025/8026.
+6. **Frontend language → TypeScript.** Gives a type-checkable contract against the API, which matters more than usual when an agent is writing much of the client code.
