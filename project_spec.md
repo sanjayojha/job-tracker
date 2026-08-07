@@ -41,7 +41,7 @@ A single-user web application to track job applications through their lifecycle,
 | Frontend              | React 19 + Vite, TypeScript                                                                | Separate SPA, no Next.js, consumes REST API only                                                     |
 | Styling               | Tailwind CSS 4                                                                             | Vite plugin, no `tailwind.config.js`; theme customisation via `@theme` in CSS                        |
 | API auth              | Laravel Sanctum (SPA authentication, cookie-based)                                         | Standard Laravel-recommended approach for a first-party SPA talking to its own API                   |
-| Database              | PostgreSQL 18                                                                              | See §10.2                                                                                            |
+| Database              | PostgreSQL 18                                                                              | See §9.2                                                                                            |
 | Cache / Queue backend | Redis                                                                                      | Used for both cache driver and queue connection                                                      |
 | Queues                | Laravel Jobs + `redis` queue driver, Horizon for monitoring                                | Reminder dispatch, notification sending, any file post-processing                                    |
 | Scheduling            | Laravel Task Scheduling (`routes/console.php` / scheduled commands) via cron on the server | Daily staleness scan                                                                                 |
@@ -67,45 +67,9 @@ A single-user web application to track job applications through their lifecycle,
 
 ## 8. Architecture
 
-```
-┌─────────────────┐         ┌──────────────────────┐
-│   React SPA      │◄───────►│  Laravel REST API     │
-│  (Vite, React 19)│  HTTPS  │  (Sanctum SPA auth)    │
-└─────────────────┘         └──────────┬────────────┘
-                                        │
-                     ┌──────────────────┼───────────────────┐
-                     │                  │                   │
-              ┌──────▼─────┐    ┌───────▼───────┐   ┌───────▼───────┐
-              │ PostgreSQL  │    │     Redis      │   │      S3        │
-              │ (app data)  │    │ (cache+queue)  │   │  (attachments)  │
-              └────────────┘    └───────┬───────┘   └────────────────┘
-                                         │
-                                 ┌───────▼────────┐
-                                 │  Queue Worker    │
-                                 │ (Horizon-managed)│
-                                 │  Jobs, Listeners  │
-                                 └───────┬────────┘
-                                         │
-                                 ┌───────▼────────┐
-                                 │  Mail / Notif.   │
-                                 │   (SES / SMTP)   │
-                                 └────────────────┘
+Moved to [docs/architecture.md](docs/architecture.md) — system overview, data flow, and component relationships live there so there is a single place to look. This spec covers what the product is and why the choices were made; the architecture doc covers how the pieces fit together.
 
-Scheduler (cron → `schedule:run`) triggers the daily staleness-scan command,
-which queries stale applications and dispatches reminder Jobs.
-```
-
-## 9. System design notes
-
-- **Repo layout**: single monorepo with `/backend` (Laravel) and `/frontend` (React/Vite) — see §10.1.
-- **Auth flow**: Sanctum SPA authentication (session cookie + CSRF token), not token-based API auth, since the React app is first-party and same-origin (or configured as a trusted origin) — this is the Laravel-recommended pattern for a first-party SPA, not full OAuth/Passport.
-- **Status pipeline** stored as an enum-backed column, not free text, with a dedicated `ApplicationStatusHistory` table for the audit trail.
-- **Staleness definition**: configurable threshold (e.g. no status change in 10 days while not already Rejected/Withdrawn/Offer) — kept as config, not hardcoded, so it's easy to tune.
-- **Notification channels**: `mail` + `database` initially; `broadcast` channel intentionally deferred (see brainstorm.md — real-time is reserved for the flagship SaaS project).
-- **File storage path convention**: `applications/{application_id}/{uuid}-{original_filename}` on the `s3` disk, with presigned GET URLs generated on demand rather than public bucket access.
-- **Deployment target for V1**: single EC2 instance (or Forge-provisioned) is enough — ECS/Fargate is a stretch goal, not a requirement, since infra complexity isn't the point of this particular project.
-
-## 10. Decisions (resolved at scaffold time)
+## 9. Decisions (resolved at scaffold time)
 
 1. **Repo layout → monorepo.** Single git repo with `/backend` (Laravel) and `/frontend` (React/Vite). Keeps the API and its consumer in one Claude Code context so contract changes stay in sync, and avoids doubling the CI/deploy setup for a solo project.
 2. **Database → PostgreSQL 18.** Preferred over MySQL 8 on general merit; DDEV supports `postgres:18` directly and RDS supports it equally well for deploy, so there was no cost to taking the preference.

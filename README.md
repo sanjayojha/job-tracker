@@ -16,7 +16,7 @@ A single-user web app for tracking job applications through their lifecycle — 
 | Local env     | DDEV                                                      |
 | AI tooling    | Laravel Boost (MCP) — see below                           |
 
-Monorepo: `backend/` (Laravel) and `frontend/` (React). See [project_spec.md §10](project_spec.md) for the reasoning behind each choice.
+Monorepo: `backend/` (Laravel) and `frontend/` (React). See [project_spec.md §9](project_spec.md) for the reasoning behind each choice.
 
 ## Local setup
 
