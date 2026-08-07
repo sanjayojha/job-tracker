@@ -1,7 +1,0 @@
-#!/bin/bash
-
-## Description: Run the Vite dev server for the React SPA (frontend/)
-## Usage: vite [flags] [args]
-## Example: "ddev vite"
-
-cd /var/www/html/frontend && npm run dev -- "$@"

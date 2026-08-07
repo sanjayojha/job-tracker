@@ -1,8 +1,9 @@
-# DDEV generates per-project artifacts alongside the tracked config
-/.ddev/.*
-/.ddev/*-build
-/.ddev/db_snapshots
-/.ddev/traefik
+# The DDEV environment is per-machine and not tracked.
+# Recreate it from the "Local setup" section of README.md.
+/.ddev/
+
+# Personal Claude Code notes; CLAUDE.md itself is tracked.
+CLAUDE.local.md
 
 # Stray root .env if DDEV's laravel settings step writes one here;
 # the real one lives at backend/.env
