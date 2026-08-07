@@ -1,0 +1,13 @@
+# DDEV generates per-project artifacts alongside the tracked config
+/.ddev/.*
+/.ddev/*-build
+/.ddev/db_snapshots
+/.ddev/traefik
+
+# Stray root .env if DDEV's laravel settings step writes one here;
+# the real one lives at backend/.env
+/.env
+
+.DS_Store
+*.swp
+.idea/
