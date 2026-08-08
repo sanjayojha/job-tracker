@@ -135,13 +135,23 @@ Driven by the jobs-to-be-done in [project_spec.md](project_spec.md):
 - **Push after committing.** Solo repo, no review gate — a local-only commit is unbacked-up work. `/update-docs-and-commit` handles this. If a push is rejected, stop and report rather than forcing or rebasing unasked.
 - Git identity for this repo is already configured; don't override it.
 
-GitHub Actions runs the same lint and test steps on every push to `main` and every PR (`.github/workflows/ci.yml`). Run them locally first — CI is a backstop, not the feedback loop:
+GitHub Actions runs the same lint and test steps on every push to `main` and every PR (`.github/workflows/ci.yml`). CI is a backstop, not the feedback loop — run these locally before pushing:
 
 ```bash
 ddev artisan test
 ddev exec --dir /var/www/html/frontend npm run lint
 ddev exec --dir /var/www/html/frontend npm run build   # catches type errors
 ```
+
+When CI fails, read the actual log — `gh` is installed and authenticated. Diagnose from the log rather than guessing and re-pushing:
+
+```bash
+gh run list --limit 5
+gh run view --log-failed              # most recent run
+gh run view <run-id> --log-failed
+```
+
+Note that CI runs on a clean checkout, so it catches things local runs cannot — untracked files, empty directories git does not store, and anything that depends on leftover local state.
 
 ## Testing
 

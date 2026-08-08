@@ -63,21 +63,6 @@ jobs:
       - name: Lint (Pint)
         run: vendor/bin/pint --test
 
-      - name: Verify database connectivity
-        env:
-          DB_HOST: 127.0.0.1
-          DB_PORT: 5432
-        run: |
-          php -r '
-            try {
-              new PDO("pgsql:host=127.0.0.1;port=5432;dbname=test", "db", "db");
-              echo "connected to postgres\n";
-            } catch (Throwable $e) {
-              echo "::error::DB connect failed: " . $e->getMessage() . "\n";
-              exit(1);
-            }
-          '
-
       - name: Test (Pest)
         # phpunit.xml points DB_HOST at DDEV's `db` hostname, which does not
         # exist here. PHPUnit's <env> defaults to force="false", so a real
@@ -85,19 +70,7 @@ jobs:
         env:
           DB_HOST: 127.0.0.1
           DB_PORT: 5432
-        run: |
-          set +e
-          php artisan test 2>&1 | tee /tmp/test-output.txt
-          code=${PIPESTATUS[0]}
-          if [ "$code" -ne 0 ]; then
-            # Surface the failure as an annotation so it is visible without
-            # opening the raw log. %0A is GitHub's newline escape.
-            body=$(tail -c 3000 /tmp/test-output.txt \
-              | sed 's/%/%25/g; s/\r//g' \
-              | sed ':a;N;$!ba;s/\n/%0A/g')
-            echo "::error title=Pest failed::${body}"
-          fi
-          exit "$code"
+        run: php artisan test
 
   frontend:
     name: Frontend (lint + build)
