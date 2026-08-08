@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-08-07
+**Last updated:** 2026-08-08
 **Project start date:** 2026-08-07
 **Current phase:** Phase 0 — Foundation
 **Next target date:** _not set_
@@ -30,6 +30,7 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 - [x] Laravel Boost installed, MCP server reachable via `ddev artisan boost:mcp`
 - [x] Open spec decisions resolved and recorded (project_spec.md §9)
 - [x] Documentation set established: README, architecture, changelog, this file
+- [x] First custom slash command: `/update-docs-and-commit`
 
 ### Remaining in this phase
 

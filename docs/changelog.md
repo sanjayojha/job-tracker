@@ -16,6 +16,7 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - Tailwind CSS 4, wired as a Vite plugin
 - Laravel Boost with an MCP server for agent introspection of the app
 - `docs/architecture.md`, `docs/project_status.md`, and this changelog
+- `/update-docs-and-commit` slash command, which reconciles the `docs/` set with the working tree and then commits
 
 ### Changed
 
