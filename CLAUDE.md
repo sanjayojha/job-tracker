@@ -131,7 +131,7 @@ Driven by the jobs-to-be-done in [project_spec.md](project_spec.md):
 - **Never force-push to `main`.**
 - Use `/update-docs-and-commit` to commit — it keeps `docs/` in sync with the code.
 - Commits: short imperative subject, body explaining _why_. One logical change per commit.
-- **Never push without being asked.** Pushing is always an explicit decision.
+- **Push after committing.** Solo repo, no review gate — a local-only commit is unbacked-up work. `/update-docs-and-commit` handles this. If a push is rejected, stop and report rather than forcing or rebasing unasked.
 - Git identity for this repo is already configured; don't override it.
 
 Before pushing:

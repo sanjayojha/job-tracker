@@ -1,7 +1,7 @@
 ---
-description: Update docs/ and CLAUDE.md to reflect the working-tree changes, then stage and commit everything
+description: Update docs/ and CLAUDE.md to reflect the working-tree changes, then commit and push
 argument-hint: "[optional context, e.g. 'this closes the auth milestone']"
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git ls-files:*), Read, Edit, Write, Glob, Grep
+allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git ls-files:*), Bash(git branch:*), Read, Edit, Write, Glob, Grep
 ---
 
 ## Current state
@@ -93,8 +93,14 @@ columns. Mention anything surprising a future reader would trip on.
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 ```
 
-**Do not push.** Pushing stays a separate, explicit decision.
+### 7. Push
 
-### 7. Report back
+Push to the current branch's remote. This is a solo repo with no review gate, so a commit that only exists locally is unbacked-up work with no upside.
+
+- On `main`, `git push` is enough.
+- On a new branch, use `git push -u origin <branch>` to set upstream.
+- **Never force-push.** If the push is rejected, stop and report it rather than forcing or rebasing unasked.
+
+### 8. Report back
 
 State concisely: which files you changed and why, which you deliberately left alone, and the commit subject. If you chose not to touch `architecture.md` or `CLAUDE.md`, say so — that is a real decision, not an omission.
