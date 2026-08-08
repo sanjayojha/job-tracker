@@ -21,9 +21,11 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - API scaffolding via `install:api` — `routes/api.php`, Sanctum, and JSON error rendering for `api/*`
 - API routes are versioned under `/api/v1/` through `apiPrefix`
 - React Router 8 (declarative mode) and TanStack Query 5, wired as providers in `frontend/src/main.tsx`
+- Pest 4 as the test runner, with feature tests covering the health endpoint and API authentication
 
 ### Changed
 
+- Tests run against a real PostgreSQL `test` database instead of SQLite in-memory, so they exercise the engine the app deploys on
 - `.ddev/` is no longer tracked in git; the environment is reproduced from the setup steps in `README.md`
 
 [unreleased]: https://github.com/sanjayojha/job-tracker/commits/main

@@ -58,7 +58,7 @@ Things that look reasonable and are wrong here:
 - **React Router is v8, not v7.** Docs and tutorials for v7 mostly still apply to the declarative API, but check before trusting them.
 - **Tailwind is v4, not v3.** Most tutorials describe v3 and will mislead you — see Frontend and design below.
 - **The database is PostgreSQL, not MySQL.** String comparison is case-sensitive, and `ILIKE`/`JSONB` differ from MySQL. Don't write MySQL-flavoured SQL.
-- **Testing is PHPUnit today.** The spec calls for Pest; it is not installed yet. Don't write Pest syntax until it is.
+- **Tests run against real PostgreSQL, not SQLite.** Never change `phpunit.xml` back to `sqlite`/`:memory:` — a test asserts this, and reverting it would silently stop covering the engine we deploy on.
 
 ## Use Boost's MCP tools
 
@@ -146,7 +146,10 @@ ddev exec --dir /var/www/html/frontend npm run build   # catches type errors
 
 Test coverage is required on the three things most likely to break silently: **status transition logic, staleness detection, and notification dispatch.** Prioritise these over coverage percentage.
 
+**Pest 4**, not PHPUnit syntax — `it('does something', function () { ... })` with `expect()`. Feature tests get `TestCase` and `RefreshDatabase` automatically via `tests/Pest.php`; don't re-declare them per file.
+
 - Feature tests for API endpoints; unit tests for job and notification logic.
+- Tests hit a real PostgreSQL `test` database. Unit tests must not need a database or a framework boot — if one does, it's a feature test.
 - `ddev artisan test` runs the backend suite.
 - Verify against real behaviour, not just green tests — hit the running app when a change is user-visible. Don't report work as done on the strength of tests alone.
 - Report failures honestly with their output. Never describe something as verified when it wasn't.

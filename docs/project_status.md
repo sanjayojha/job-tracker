@@ -35,10 +35,10 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 - [x] Pint available and passing (`ddev composer exec pint`) — ships with Laravel, no config needed
 - [x] API scaffolding installed; routes versioned under `/api/v1/` and returning JSON
 - [x] Frontend libraries chosen and wired: React Router 8, TanStack Query 5, no component library
+- [x] Pest 4 configured, running against a real PostgreSQL `test` database — 5 tests passing
 
 ### Remaining in this phase
 
-- [ ] Pest configured with a first passing test (PHPUnit 12 is what ships today, and it passes)
 - [ ] GitHub Actions: lint → test on push
 - [ ] Sanctum SPA auth wired end-to-end (`SANCTUM_STATEFUL_DOMAINS`, `SESSION_DOMAIN`, CORS `supports_credentials`) with a login round-trip from the SPA
 
