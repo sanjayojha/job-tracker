@@ -8,6 +8,9 @@ CLAUDE.local.md
 # Scratch output from the Playwright MCP server.
 .playwright-mcp/
 
+# Personal learning notes taken during development. Local only, by choice.
+/learning/
+
 # Stray root .env if DDEV's laravel settings step writes one here;
 # the real one lives at backend/.env
 /.env
