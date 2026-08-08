@@ -31,12 +31,13 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 - [x] Open spec decisions resolved and recorded (project_spec.md §9)
 - [x] Documentation set established: README, architecture, changelog, this file
 - [x] First custom slash command: `/update-docs-and-commit`
+- [x] Root `CLAUDE.md` with project conventions, environment rules, and design/UX guidelines
+- [x] Pint available and passing (`ddev composer exec pint`) — ships with Laravel, no config needed
 
 ### Remaining in this phase
 
-- [ ] Root `CLAUDE.md` with project conventions, linking the three `docs/` files
-- [ ] Pest configured with a first passing test
-- [ ] Pint configured for backend formatting
+- [ ] Pest configured with a first passing test (PHPUnit 12 is what ships today, and it passes)
+- [ ] `routes/api.php` created via `install:api` — no API routes exist yet
 - [ ] GitHub Actions: lint → test on push
 - [ ] Sanctum SPA auth wired end-to-end (`SANCTUM_STATEFUL_DOMAINS`, `SESSION_DOMAIN`, CORS `supports_credentials`) with a login round-trip from the SPA
 

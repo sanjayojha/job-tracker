@@ -17,6 +17,7 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - Laravel Boost with an MCP server for agent introspection of the app
 - `docs/architecture.md`, `docs/project_status.md`, and this changelog
 - `/update-docs-and-commit` slash command, which reconciles the `docs/` set with the working tree and then commits
+- Root `CLAUDE.md` carrying project conventions, environment rules, and design/UX guidelines for AI agents
 
 ### Changed
 
