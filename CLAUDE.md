@@ -159,3 +159,5 @@ Test coverage is required on the three things most likely to break silently: **s
 - [README.md](README.md) — setup and environment reproduction
 
 Update `docs/` after milestones and significant additions — `/update-docs-and-commit` does this. A stale doc is worse than none, because an agent follows it confidently and is wrong.
+
+**Maintaining this file.** It describes the present, not the journey. Edit it when a stated fact becomes false — a trap is resolved, a new one appears, an open decision closes, or a command changes. Delete resolved lines rather than marking them done; progress and history belong in `docs/`. Nothing here should need re-reading to be trusted, so anything wrong must be removed immediately.

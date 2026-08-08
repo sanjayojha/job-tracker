@@ -1,5 +1,5 @@
 ---
-description: Update docs/ to reflect the working-tree changes, then stage and commit everything
+description: Update docs/ and CLAUDE.md to reflect the working-tree changes, then stage and commit everything
 argument-hint: "[optional context, e.g. 'this closes the auth milestone']"
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git ls-files:*), Read, Edit, Write, Glob, Grep
 ---
@@ -58,7 +58,21 @@ Adding a model, controller, or component that follows a pattern the file already
 
 Only tick something off if the diff shows it is actually done and verified. An unticked item is recoverable; a wrongly-ticked one gets believed.
 
-### 5. Commit
+### 5. `CLAUDE.md` — only if a stated fact is now wrong
+
+This file is injected into every session and believed without being re-read, so a stale line there is more damaging than anywhere else. It is also the easiest file to bloat. Edit it **only** when:
+
+- A **Trap** was resolved and should be deleted — e.g. `routes/api.php` now exists, or Pest replaced PHPUnit
+- A **new trap** appeared: something that looks reasonable but is wrong in this repo
+- An **open decision closed** — component library, routing, state management, API client
+- A **command changed**, or a documented path/URL moved
+- A convention or constraint was added, dropped, or reversed
+
+Do **not** add feature descriptions, progress, or history — those belong in the other three files. When something is resolved, **delete the line** rather than annotating it as done; this file describes the present, not the journey.
+
+If nothing in it became false, leave it completely alone. That is the normal case.
+
+### 6. Commit
 
 Stage everything with `git add -A`, then verify nothing sensitive is staged:
 
@@ -81,6 +95,6 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 
 **Do not push.** Pushing stays a separate, explicit decision.
 
-### 6. Report back
+### 7. Report back
 
-State concisely: which docs you changed and why, which you deliberately left alone, and the commit subject. If you chose not to touch `architecture.md`, say so — that is a real decision, not an omission.
+State concisely: which files you changed and why, which you deliberately left alone, and the commit subject. If you chose not to touch `architecture.md` or `CLAUDE.md`, say so — that is a real decision, not an omission.
