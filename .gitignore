@@ -5,6 +5,9 @@
 # Personal Claude Code notes; CLAUDE.md itself is tracked.
 CLAUDE.local.md
 
+# Scratch output from the Playwright MCP server.
+.playwright-mcp/
+
 # Stray root .env if DDEV's laravel settings step writes one here;
 # the real one lives at backend/.env
 /.env

@@ -68,15 +68,20 @@ They share a repo for context and tooling convenience, not a runtime. Each deplo
 
 - **React 19 + Vite, TypeScript.** Separate SPA, no SSR framework.
 - **Tailwind CSS 4** for styling — Vite plugin, no config file, theme via `@theme` in CSS.
+- **React Router 8** in declarative mode — client-side routing only, no loaders or framework features.
+- **TanStack Query 5** over native `fetch` for all server state. Providers are wired in `src/main.tsx`.
+- **No component library.** Components are hand-built on Tailwind.
 - Served in development from Vite on `:5173`, published through ddev-router. The API sits on `:443` of the same host; cookies are not port-scoped, so the Sanctum session cookie works across that split.
 
-_Planned:_ component structure, routing, and state management are not yet established. Decide these when the first real UI lands rather than pre-committing here.
+Server state lives entirely in the Query cache; there is no separate client-state store, because almost nothing in this app is client-only state. The cache invalidation on the client mirrors the Redis invalidation on the server — a mutation that changes an application's status must invalidate both the application list and the dashboard aggregates, or the two layers disagree.
+
+_Planned:_ route structure and component organisation are established when the first real screens land.
 
 ### API Layers
 
 Request path through the backend:
 
-1. **Routes** — versioned under `/api/v1/...`.
+1. **Routes** — versioned under `/api/v1/...`, set via `apiPrefix` in `bootstrap/app.php`. `routes/api.php` holds them; exceptions render as JSON for `api/*`.
 2. **Middleware** — Sanctum SPA authentication (session cookie + CSRF token), not token-based API auth, since the SPA is first-party. Not OAuth/Passport.
 3. **Form Requests** — validation, including server-side file type and size checks regardless of client-side validation.
 4. **Controllers** — thin; they translate HTTP to domain calls and back.

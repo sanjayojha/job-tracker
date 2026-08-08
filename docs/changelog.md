@@ -18,6 +18,9 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - `docs/architecture.md`, `docs/project_status.md`, and this changelog
 - `/update-docs-and-commit` slash command, which reconciles the `docs/` set with the working tree and then commits
 - Root `CLAUDE.md` carrying project conventions, environment rules, and design/UX guidelines for AI agents
+- API scaffolding via `install:api` — `routes/api.php`, Sanctum, and JSON error rendering for `api/*`
+- API routes are versioned under `/api/v1/` through `apiPrefix`
+- React Router 8 (declarative mode) and TanStack Query 5, wired as providers in `frontend/src/main.tsx`
 
 ### Changed
 
