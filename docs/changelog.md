@@ -22,6 +22,7 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - API routes are versioned under `/api/v1/` through `apiPrefix`
 - React Router 8 (declarative mode) and TanStack Query 5, wired as providers in `frontend/src/main.tsx`
 - Pest 4 as the test runner, with feature tests covering the health endpoint and API authentication
+- GitHub Actions CI: backend lint (Pint) and tests (Pest against a PostgreSQL 18 service), frontend lint (oxlint) and build, on every push to `main` and every pull request
 
 ### Changed
 

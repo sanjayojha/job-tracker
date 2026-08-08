@@ -36,10 +36,10 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 - [x] API scaffolding installed; routes versioned under `/api/v1/` and returning JSON
 - [x] Frontend libraries chosen and wired: React Router 8, TanStack Query 5, no component library
 - [x] Pest 4 configured, running against a real PostgreSQL `test` database — 5 tests passing
+- [x] GitHub Actions CI: backend lint + tests, frontend lint + build, on push and PR
 
 ### Remaining in this phase
 
-- [ ] GitHub Actions: lint → test on push
 - [ ] Sanctum SPA auth wired end-to-end (`SANCTUM_STATEFUL_DOMAINS`, `SESSION_DOMAIN`, CORS `supports_credentials`) with a login round-trip from the SPA
 
 ## What's next
