@@ -8,6 +8,11 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-10
+
+Foundation release: a running development environment, a Laravel API and React SPA
+that authenticate against each other, and CI. No job-tracking features yet.
+
 ### Added
 
 - DDEV development environment: PHP 8.4, PostgreSQL 18, Redis, Node 24, Mailpit, with the Vite dev server started automatically by `ddev start` and published through ddev-router
@@ -32,4 +37,5 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - Tests run against a real PostgreSQL `test` database instead of SQLite in-memory, so they exercise the engine the app deploys on
 - `.ddev/` is no longer tracked in git; the environment is reproduced from the setup steps in `README.md`
 
-[unreleased]: https://github.com/sanjayojha/job-tracker/commits/main
+[unreleased]: https://github.com/sanjayojha/job-tracker/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/sanjayojha/job-tracker/releases/tag/v0.1.0
