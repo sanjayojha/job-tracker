@@ -51,6 +51,13 @@ web_extra_exposed_ports:
       http_port: 5172
       https_port: 5173
 
+# Run Vite automatically with `ddev start`. Requires frontend/node_modules,
+# so the daemon will restart-loop until step 4's npm install has run.
+web_extra_daemons:
+    - name: vite
+      command: "npm run dev"
+      directory: /var/www/html/frontend
+
 # Only needed if something else on your machine already holds 8025/8026
 # (a standalone Mailpit container, or another DDEV project). Omit otherwise.
 mailpit_http_port: "8035"
@@ -63,16 +70,29 @@ mailpit_https_port: "8036"
 ddev add-on get ddev/ddev-redis
 ```
 
-Create `.ddev/commands/web/vite`, then `chmod +x` it:
+Create `.ddev/commands/web/vite`, then `chmod +x` it. Vite itself is started by
+the daemon above; this command controls that process:
 
 ```bash
 #!/bin/bash
 
-## Description: Run the Vite dev server for the React SPA (frontend/)
-## Usage: vite [flags] [args]
-## Example: "ddev vite"
+## Description: Control the Vite dev server daemon (frontend/)
+## Usage: vite [status|restart|stop|start]
+## Example: "ddev vite restart"
 
-cd /var/www/html/frontend && npm run dev -- "$@"
+DAEMON=webextradaemons:vite
+ACTION="${1:-status}"
+
+case "$ACTION" in
+    status | restart | stop | start)
+        supervisorctl "$ACTION" "$DAEMON"
+        ;;
+    *)
+        echo "Usage: ddev vite [status|restart|stop|start]" >&2
+        echo "For output: ddev logs -f" >&2
+        exit 1
+        ;;
+esac
 ```
 
 ### 4. Start and install
@@ -96,15 +116,20 @@ ddev exec 'psql -h db -U db -d db -c "CREATE DATABASE test OWNER db;"'
 ## Running it
 
 ```bash
-ddev start   # API + database + redis
-ddev vite    # SPA dev server (foreground)
+ddev start   # everything: API, database, redis, and the Vite dev server
 ```
+
+Vite runs as a DDEV daemon, so there is no second command to remember and the
+SPA cannot be silently down while the API is up.
 
 |         |                                    |
 | ------- | ---------------------------------- |
 | API     | https://job-tracker.ddev.site      |
 | SPA     | https://job-tracker.ddev.site:5173 |
 | Mailpit | https://job-tracker.ddev.site:8036 |
+
+To inspect or bounce the dev server: `ddev vite status`, `ddev vite restart`.
+Its output goes to `ddev logs -f`.
 
 Common commands: `ddev artisan <cmd>`, `ddev composer <cmd>`, `ddev ssh`, `ddev logs -f`. Both `artisan` and `composer` resolve to `backend/` on their own via `composer_root`. npm does not, so use `ddev exec --dir /var/www/html/frontend npm <cmd>`.
 

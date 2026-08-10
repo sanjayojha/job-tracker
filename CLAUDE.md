@@ -36,7 +36,7 @@ Full data flows and boundaries: [docs/architecture.md](docs/architecture.md). Re
 ddev artisan <cmd>        # resolves to backend/ automatically
 ddev composer <cmd>       # resolves to backend/ automatically
 ddev exec --dir /var/www/html/frontend npm <cmd>   # npm does NOT auto-resolve
-ddev vite                 # SPA dev server, foreground
+ddev vite [status|restart|stop|start]   # Vite runs as a daemon; ddev start launches it
 ddev start | ddev restart | ddev ssh | ddev logs -f
 ```
 
