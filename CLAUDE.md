@@ -86,11 +86,20 @@ Laravel Boost exposes live introspection: `database-schema`, `database-query`, `
 
 **Tailwind 4 specifics** — no `tailwind.config.js`, no `postcss.config.js`, no `content` globs. It's a Vite plugin in `frontend/vite.config.ts`, the entry is `@import 'tailwindcss'` in `src/index.css` (not v3's `@tailwind base/components/utilities`), and theme customisation goes in `@theme { }` in CSS. If you find yourself creating a JS config file, you're following a v3 tutorial.
 
-**Visual style:** a dense internal tool, not a marketing site. The data is the interface.
+**Component files must export only components** — oxlint's fast-refresh rule fails otherwise. Constants, types, and style maps go in a sibling `.ts` file.
 
+**Visual style:** a dense internal tool, not a marketing site. The data is the interface. Modern but enterprise — think IBM, not a startup landing page.
+
+The design system is **IBM Carbon**, chosen deliberately: it is built around square corners, flat fills and restrained colour, which is exactly the brief. **Tokens live in `frontend/src/index.css` under `@theme` and are the source of truth** — this section states the rules, that file holds the values.
+
+- **Never hardcode a colour.** Use the token scales: `brand-*` (Carbon Blue), `ink-*` (Carbon Gray), `positive-*`, `critical-*`, `attention-*`. No `slate-*`, `blue-*`, or arbitrary hex.
+- **`brand-60` (`#0f62fe`) is the action colour.** Lighter blues cannot carry white text accessibly — never put white text on `brand-50` or lighter.
+- **Square corners everywhere.** The `--radius-*` tokens are zeroed, so a stray `rounded-md` renders flat. Don't add radius back.
+- **No gradients, no shadows for depth, no 3D effects.** Separation comes from borders (`border-ink-20`) and background steps (`bg-white` on `bg-ink-10`).
+- **Typeface is IBM Plex Sans**, self-hosted via `@fontsource` — 400/500/600 only. `font-mono` (IBM Plex Mono) is for figures that must align. Base size is 14px, not 16px.
+- **Icons are Phosphor with `weight="light"`**, imported with the `Icon` suffix (`WarningCircleIcon`, not the deprecated `WarningCircle`). Keep them 16–18px next to text.
+- **Status colour is restrained** and defined once in `frontend/src/features/applications/status.ts`: grey for stages needing no action, `brand-*` for stages in play, `positive-*` for an offer, faded grey for closed. Staleness (`attention-*`) is the only thing allowed to shout — being told what has gone quiet is the point of the tool.
 - Scannable over decorative. A list of applications should be readable at a glance without hovering or clicking.
-- Status is the primary organising signal — make pipeline stage and staleness visually obvious.
-- Consistent, restrained palette. Reserve colour for meaning (status, staleness warnings), not decoration.
 - Responsive, but desktop is the real target — this is used while sitting down to job hunt.
 - No dark mode for MVP.
 

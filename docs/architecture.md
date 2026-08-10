@@ -71,10 +71,11 @@ They share a repo for context and tooling convenience, not a runtime. Each deplo
 ### Frontend Components
 
 - **React 19 + Vite, TypeScript.** Separate SPA, no SSR framework.
-- **Tailwind CSS 4** for styling — Vite plugin, no config file, theme via `@theme` in CSS.
+- **Tailwind CSS 4** for styling — Vite plugin, no config file, theme via `@theme` in CSS. Design tokens (IBM Carbon palette, IBM Plex Sans, zero radius) live in `src/index.css` and are the source of truth for the visual system.
+- **Phosphor icons** at Light weight, imported with the `Icon` suffix.
 - **React Router 8** in declarative mode — client-side routing only, no loaders or framework features.
 - **TanStack Query 5** over native `fetch` for all server state. Providers are wired in `src/main.tsx`.
-- **No component library.** Components are hand-built on Tailwind.
+- **No component library.** Components are hand-built on Tailwind, so accessibility is on us.
 - Served in development from Vite on `:5173`, published through ddev-router. The API sits on `:443` of the same host; cookies are not port-scoped, so the Sanctum session cookie works across that split.
 
 Server state lives entirely in the Query cache; there is no separate client-state store, because almost nothing in this app is client-only state. The cache invalidation on the client mirrors the Redis invalidation on the server — a mutation that changes an application's status must invalidate both the application list and the dashboard aggregates, or the two layers disagree.

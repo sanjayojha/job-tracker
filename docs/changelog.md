@@ -8,6 +8,10 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 
 ## [Unreleased]
 
+### Added
+
+- Design system based on IBM Carbon: Carbon Blue and Gray token scales, IBM Plex Sans and Mono self-hosted via `@fontsource`, Phosphor icons at Light weight, square corners enforced at the token level, and a restrained status-colour vocabulary
+
 ## [0.1.0] - 2026-08-10
 
 Foundation release: a running development environment, a Laravel API and React SPA

@@ -1,1 +1,95 @@
 @import 'tailwindcss';
+
+/* Self-hosted, no external CDN. 400/500/600 only -- a dense UI needs weight
+   contrast, not many weights. Mono is for dates, counts and IDs, where
+   figures must line up in columns. */
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+
+/*
+| Design tokens. This block is the source of truth for the visual system;
+| CLAUDE.md states the rules, these are the values.
+|
+| Palette is IBM Carbon. Deliberate, not incidental: it is the enterprise
+| design language this app is modelled on, and it is built around square
+| corners, flat fills and restrained colour -- which is exactly the brief.
+*/
+@theme {
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Square corners everywhere. Zeroed at the token level rather than by
+     convention, so a stray `rounded-md` renders flat instead of drifting. */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
+
+  /* Brand — Carbon Blue. 60 is the action colour: 8.6:1 on white.
+     Anything lighter cannot carry white text accessibly. */
+  --color-brand-10: #edf5ff;
+  --color-brand-20: #d0e2ff;
+  --color-brand-30: #a6c8ff;
+  --color-brand-40: #78a9ff;
+  --color-brand-50: #4589ff;
+  --color-brand-60: #0f62fe;
+  --color-brand-70: #0043ce;
+  --color-brand-80: #002d9c;
+
+  /* Neutrals — Carbon Gray. Carries almost the entire interface. */
+  --color-ink-10: #f4f4f4;
+  --color-ink-20: #e0e0e0;
+  --color-ink-30: #c6c6c6;
+  --color-ink-40: #a8a8a8;
+  --color-ink-50: #8d8d8d;
+  --color-ink-60: #6f6f6f;
+  --color-ink-70: #525252;
+  --color-ink-80: #393939;
+  --color-ink-90: #262626;
+  --color-ink-100: #161616;
+
+  /* Outcomes only. Never decorative. */
+  --color-positive-10: #defbe6;
+  --color-positive-60: #198038;
+  --color-positive-70: #0e6027;
+
+  --color-critical-10: #fff1f1;
+  --color-critical-60: #da1e28;
+  --color-critical-70: #a2191f;
+
+  /* Staleness. The single loudest thing in the UI, because being told what
+     has gone quiet is the entire point of the tool. */
+  --color-attention-10: #fcf4d6;
+  --color-attention-60: #b28600;
+  --color-attention-70: #8e6a00;
+}
+
+@layer base {
+  html {
+    /* Dense internal tool: 14px base, not 16px. Desktop is the real target. */
+    font-size: 14px;
+  }
+
+  body {
+    @apply bg-white text-ink-100 antialiased;
+  }
+
+  /* Carbon-style focus: a hard 2px outline, not a soft glow. Visible on every
+     interactive element, which is load-bearing given there is no component
+     library handling it. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-60);
+    outline-offset: 1px;
+  }
+
+  /* Figures line up in columns without reaching for the mono face. */
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+}

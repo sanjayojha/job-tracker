@@ -11,8 +11,8 @@ export function RequireAuth({ children }: { children: ReactNode }) {
 
   if (isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-100">
-        <p className="text-sm text-slate-600">Loading…</p>
+      <div className="flex min-h-screen items-center justify-center bg-ink-10">
+        <p className="text-ink-70">Loading…</p>
       </div>
     )
   }
@@ -22,13 +22,13 @@ export function RequireAuth({ children }: { children: ReactNode }) {
     // out, which useUser resolves to null. Showing a login form here would
     // misdescribe the problem and send the user in circles.
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
-        <div className="max-w-sm text-sm">
-          <h1 className="font-semibold text-slate-900">Cannot reach the server</h1>
-          <p className="mt-1 text-slate-600">
+      <main className="flex min-h-screen items-center justify-center bg-ink-10 px-4">
+        <div className="max-w-sm">
+          <h1 className="font-semibold tracking-tight text-ink-100">Cannot reach the server</h1>
+          <p className="mt-1 text-ink-70">
             {error instanceof Error ? error.message : 'Unknown error.'}
           </p>
-          <p className="mt-2 text-slate-600">Check that the API is running, then reload.</p>
+          <p className="mt-2 text-ink-70">Check that the API is running, then reload.</p>
         </div>
       </main>
     )

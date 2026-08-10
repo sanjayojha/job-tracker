@@ -1,6 +1,13 @@
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
+// Phosphor 2.1 renamed exports to an `Icon` suffix; the bare names are
+// deprecated aliases. Always import the suffixed form.
+import { WarningCircleIcon } from '@phosphor-icons/react'
 import { ApiError } from '../../lib/api'
 import { useLogin } from './api'
+
+const fieldClass =
+  'mt-1 w-full border border-ink-30 bg-white px-3 py-2 text-ink-100 ' +
+  'placeholder:text-ink-50 focus:border-brand-60 aria-invalid:border-critical-60'
 
 export function LoginPage() {
   const login = useLogin()
@@ -13,33 +20,36 @@ export function LoginPage() {
   // A throttled or otherwise non-validation failure has no field to attach to.
   const generalError = error && !emailError && !passwordError ? error.message : null
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    login.mutate({ email, password })
-  }
-
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
+    <main className="flex min-h-screen items-center justify-center bg-ink-10 px-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-xl font-semibold text-slate-900">Job Tracker</h1>
-        <p className="mt-1 text-sm text-slate-600">Sign in to continue.</p>
+        <h1 className="text-xl font-semibold tracking-tight text-ink-100">Job Tracker</h1>
+        <p className="mt-1 text-ink-70">Sign in to continue.</p>
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(event) => {
+            event.preventDefault()
+            login.mutate({ email, password })
+          }}
           noValidate
-          className="mt-6 space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+          className="mt-6 border border-ink-20 bg-white p-6"
         >
           {generalError && (
             <p
               role="alert"
-              className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+              className="mb-4 flex items-start gap-2 border-l-2 border-critical-60 bg-critical-10 px-3 py-2 text-ink-100"
             >
+              <WarningCircleIcon
+                weight="light"
+                size={18}
+                className="mt-px shrink-0 text-critical-60"
+              />
               {generalError}
             </p>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-800">
+            <label htmlFor="email" className="block font-medium text-ink-80">
               Email
             </label>
             <input
@@ -53,17 +63,17 @@ export function LoginPage() {
               onChange={(event) => setEmail(event.target.value)}
               aria-invalid={emailError ? true : undefined}
               aria-describedby={emailError ? 'email-error' : undefined}
-              className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-400 focus:outline-none"
+              className={fieldClass}
             />
             {emailError && (
-              <p id="email-error" className="mt-1 text-sm text-red-700">
+              <p id="email-error" className="mt-1 text-critical-70">
                 {emailError}
               </p>
             )}
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-800">
+          <div className="mt-4">
+            <label htmlFor="password" className="block font-medium text-ink-80">
               Password
             </label>
             <input
@@ -76,10 +86,10 @@ export function LoginPage() {
               onChange={(event) => setPassword(event.target.value)}
               aria-invalid={passwordError ? true : undefined}
               aria-describedby={passwordError ? 'password-error' : undefined}
-              className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:ring-2 focus:ring-slate-400 focus:outline-none"
+              className={fieldClass}
             />
             {passwordError && (
-              <p id="password-error" className="mt-1 text-sm text-red-700">
+              <p id="password-error" className="mt-1 text-critical-70">
                 {passwordError}
               </p>
             )}
@@ -88,7 +98,7 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={login.isPending}
-            className="w-full rounded bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:outline-none disabled:opacity-60"
+            className="mt-6 w-full bg-brand-60 px-3 py-2.5 font-medium text-white hover:bg-brand-70 disabled:cursor-not-allowed disabled:bg-ink-40"
           >
             {login.isPending ? 'Signing in…' : 'Sign in'}
           </button>
