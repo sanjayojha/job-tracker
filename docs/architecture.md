@@ -43,6 +43,10 @@ A scheduler (cron → `schedule:run`) triggers the daily staleness-scan command,
 
 ## Data Flow
 
+**Auth path (login):** SPA `GET /sanctum/csrf-cookie` → Laravel sets an `XSRF-TOKEN` cookie → SPA `POST /api/v1/login` with that token URL-decoded into an `X-XSRF-TOKEN` header and `credentials: 'include'` → the `web` guard authenticates and the session ID is regenerated → the session cookie authenticates every later request. The SPA never holds a token; it asks `GET /api/v1/user` who it is, because the session cookie is `HttpOnly` and unreadable from JavaScript.
+
+The SPA is on `:5173` and the API on `:443`. Different ports are different *origins* for CORS (hence `supports_credentials` and an explicit allowed origin), but the same *host* for cookies, which ignore port — so the session cookie is shared without any subdomain setup.
+
 **Read path (dashboard):** SPA request → Sanctum session cookie authenticates → controller asks for aggregate stats → Redis cache hit returns immediately; on miss, the aggregate is computed from PostgreSQL, cached, and returned.
 
 **Write path (status change):** SPA `PATCH` → controller delegates to a single status-transition action → action persists the new status, writes an `ApplicationStatusHistory` row, and fires `ApplicationStatusChanged` → listeners invalidate the cached dashboard aggregates and recalculate the reminder schedule. Controllers never set status directly; that funnel is what keeps the audit log trustworthy.
@@ -82,7 +86,7 @@ _Planned:_ route structure and component organisation are established when the f
 Request path through the backend:
 
 1. **Routes** — versioned under `/api/v1/...`, set via `apiPrefix` in `bootstrap/app.php`. `routes/api.php` holds them; exceptions render as JSON for `api/*`.
-2. **Middleware** — Sanctum SPA authentication (session cookie + CSRF token), not token-based API auth, since the SPA is first-party. Not OAuth/Passport.
+2. **Middleware** — Sanctum SPA authentication (session cookie + CSRF token), not token-based API auth, since the SPA is first-party. Not OAuth/Passport. `statefulApi()` in `bootstrap/app.php` makes API requests session-backed **only when their `Origin`/`Referer` is in `SANCTUM_STATEFUL_DOMAINS`**; anything else falls through to token auth and has no session at all.
 3. **Form Requests** — validation, including server-side file type and size checks regardless of client-side validation.
 4. **Controllers** — thin; they translate HTTP to domain calls and back.
 5. **Actions / Services** — the domain layer. Status transitions in particular live in a single action class.

@@ -22,6 +22,9 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - API routes are versioned under `/api/v1/` through `apiPrefix`
 - React Router 8 (declarative mode) and TanStack Query 5, wired as providers in `frontend/src/main.tsx`
 - Pest 4 as the test runner, with feature tests covering the health endpoint and API authentication
+- Sanctum SPA authentication end to end: `POST /api/v1/login`, `POST /api/v1/logout`, `GET /api/v1/user`, rate-limited login, and CSRF via `/sanctum/csrf-cookie`
+- Login screen and session-gated app shell in the SPA, with server state managed by TanStack Query
+- Seeded single-user account, configurable via `SEED_USER_*` environment variables
 - GitHub Actions CI: backend lint (Pint) and tests (Pest against a PostgreSQL 18 service), frontend lint (oxlint) and build, on every push to `main` and every pull request
 
 ### Changed

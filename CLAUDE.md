@@ -59,6 +59,8 @@ Things that look reasonable and are wrong here:
 - **Tailwind is v4, not v3.** Most tutorials describe v3 and will mislead you — see Frontend and design below.
 - **The database is PostgreSQL, not MySQL.** String comparison is case-sensitive, and `ILIKE`/`JSONB` differ from MySQL. Don't write MySQL-flavoured SQL.
 - **Tests run against real PostgreSQL, not SQLite.** Never change `phpunit.xml` back to `sqlite`/`:memory:` — a test asserts this, and reverting it would silently stop covering the engine we deploy on.
+- **Session-backed endpoints need an SPA `Origin` header in tests.** Sanctum only starts a session when the request's `Origin`/`Referer` matches `sanctum.stateful`; without it `$request->session()` throws. Use the `fromSpa()` helper in `tests/Pest.php`.
+- **`auth:sanctum` calls `shouldUse('sanctum')`.** After a request through it, a bare `assertGuest()` inspects the sanctum guard, not the session one — assert `assertGuest('web')` when testing logout.
 - **Don't add `force="true"` to `phpunit.xml`'s `<env>` entries.** CI overrides `DB_HOST` with a real environment variable because DDEV's `db` hostname doesn't exist there; `force="true"` would break that override and fail every CI run.
 
 ## Use Boost's MCP tools
@@ -80,7 +82,7 @@ Laravel Boost exposes live introspection: `database-schema`, `database-query`, `
 
 **Stack:** React 19, TypeScript, Vite, Tailwind CSS 4, React Router 8 (declarative mode), TanStack Query 5 with native `fetch`.
 
-`BrowserRouter` and `QueryClientProvider` are wired in `frontend/src/main.tsx`. **All server data goes through TanStack Query** — no bare `fetch` in a `useEffect`. Mutations must invalidate the query keys they affect, because dashboard aggregates are also cached server-side in Redis and the two have to stay in step. There is no separate client-state library and the app almost certainly doesn't need one; server data is nearly all the state there is.
+`BrowserRouter` and `QueryClientProvider` are wired in `frontend/src/main.tsx`. **All HTTP goes through `src/lib/api.ts`**, which handles `credentials: 'include'`, the `X-XSRF-TOKEN` header, and `ApiError`. Never call `fetch` directly — a bare call silently drops the session cookie and 419s on any write. **All server data goes through TanStack Query** — no bare `fetch` in a `useEffect`. Mutations must invalidate the query keys they affect, because dashboard aggregates are also cached server-side in Redis and the two have to stay in step. There is no separate client-state library and the app almost certainly doesn't need one; server data is nearly all the state there is.
 
 **Tailwind 4 specifics** — no `tailwind.config.js`, no `postcss.config.js`, no `content` globs. It's a Vite plugin in `frontend/vite.config.ts`, the entry is `@import 'tailwindcss'` in `src/index.css` (not v3's `@tailwind base/components/utilities`), and theme customisation goes in `@theme { }` in CSS. If you find yourself creating a JS config file, you're following a v3 tutorial.
 

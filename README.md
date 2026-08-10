@@ -105,11 +105,16 @@ ddev artisan key:generate
 ddev composer install
 ddev artisan migrate
 
+ddev artisan db:seed          # creates the single user account
 ddev exec --dir /var/www/html/frontend npm install
 
 # Tests run against a real PostgreSQL database, not SQLite. Create it once:
 ddev exec 'psql -h db -U db -d db -c "CREATE DATABASE test OWNER db;"'
 ```
+
+This is a single-user app with no public sign-up, so the account is seeded
+rather than registered. It defaults to `dev@job-tracker.test` / `password`;
+override with `SEED_USER_EMAIL`, `SEED_USER_NAME`, and `SEED_USER_PASSWORD`.
 
 `.env.example` already points at DDEV's in-container service hostnames (`db`, `redis`, `localhost:1025`), so no editing is needed for local work.
 

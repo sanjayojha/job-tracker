@@ -19,6 +19,11 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!-- Pin the SPA origin so tests do not depend on .env. Sanctum only
+             makes a request stateful (and therefore session-backed) when its
+             Origin/Referer host is in this list. See fromSpa() in Pest.php. -->
+        <env name="APP_URL" value="http://localhost"/>
+        <env name="SANCTUM_STATEFUL_DOMAINS" value="localhost"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>

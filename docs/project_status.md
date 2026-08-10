@@ -1,8 +1,8 @@
 # Project Status
 
-**Last updated:** 2026-08-08
+**Last updated:** 2026-08-10
 **Project start date:** 2026-08-07
-**Current phase:** Phase 0 — Foundation
+**Current phase:** Phase 1 — MVP
 **Next target date:** _not set_
 
 Answers three questions: what the milestones are, what is done, and what is next. Update it whenever a milestone moves — a stale status file is worse than none, because it is read as current.
@@ -11,14 +11,14 @@ Answers three questions: what the milestones are, what is done, and what is next
 
 | Phase | Goal | Status |
 | --- | --- | --- |
-| 0. Foundation | Running dev environment, scaffolds, agentic tooling | 🟡 In progress |
-| 1. MVP | Replace the spreadsheet: auth, CRUD, status pipeline, dashboard | ⚪ Not started |
+| 0. Foundation | Running dev environment, scaffolds, agentic tooling | ✅ Complete |
+| 1. MVP | Replace the spreadsheet: auth, CRUD, status pipeline, dashboard | 🟡 In progress |
 | 2. V1 | Automation layer: queues, scheduling, notifications, S3, Kanban | ⚪ Not started |
 | 3. V2 | Stretch: email parsing, concurrency, weekly digest, analytics | ⚪ Not started |
 
 Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP and V1 checklists there are the source of truth for what "done" means.
 
-## Current phase: Phase 0 — Foundation
+## Phase 0 — Foundation (complete)
 
 ### Accomplished
 
@@ -35,16 +35,25 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 - [x] Pint available and passing (`ddev composer exec pint`) — ships with Laravel, no config needed
 - [x] API scaffolding installed; routes versioned under `/api/v1/` and returning JSON
 - [x] Frontend libraries chosen and wired: React Router 8, TanStack Query 5, no component library
-- [x] Pest 4 configured, running against a real PostgreSQL `test` database — 5 tests passing
+- [x] Pest 4 configured, running against a real PostgreSQL `test` database
+- [x] Sanctum SPA auth end to end: login, logout, session persistence and rate limiting, verified in a real browser
+- [x] First real UI: login screen and session-gated app shell, hand-built on Tailwind
 - [x] GitHub Actions CI: backend lint + tests, frontend lint + build, on push and PR
+
+## Current phase: Phase 1 — MVP
 
 ### Remaining in this phase
 
-- [ ] Sanctum SPA auth wired end-to-end (`SANCTUM_STATEFUL_DOMAINS`, `SESSION_DOMAIN`, CORS `supports_credentials`) with a login round-trip from the SPA
+- [ ] Companies and Applications migrations, models, and factories
+- [ ] Status pipeline as an enum-backed column, with the `ApplicationStatusHistory` audit table
+- [ ] A single status-transition action firing `ApplicationStatusChanged`
+- [ ] `/api/v1` CRUD for companies and applications
+- [ ] Application list UI, sortable by date and status
+- [ ] Dashboard with counts per status
 
 ## What's next
 
-Finish Phase 0 tooling, then start the MVP with the data model — Companies and Applications migrations, the status enum, and the `ApplicationStatusHistory` table — since the API surface and the dashboard both depend on that shape.
+Start with the data model — Companies and Applications migrations, the status enum, and the `ApplicationStatusHistory` table — since the API surface and the dashboard both depend on that shape.
 
 ## Known gaps and risks
 
