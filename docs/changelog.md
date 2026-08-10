@@ -10,7 +10,7 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 
 ### Added
 
-- DDEV development environment: PHP 8.4, PostgreSQL 18, Redis, Node 24, Mailpit, with the Vite dev server published through ddev-router
+- DDEV development environment: PHP 8.4, PostgreSQL 18, Redis, Node 24, Mailpit, with the Vite dev server started automatically by `ddev start` and published through ddev-router
 - Laravel 13 REST API scaffold in `backend/`
 - React 19 + Vite SPA scaffold in `frontend/`, TypeScript
 - Tailwind CSS 4, wired as a Vite plugin
