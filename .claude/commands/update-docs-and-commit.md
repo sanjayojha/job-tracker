@@ -111,8 +111,13 @@ A commit that only exists locally is unbacked-up work with no upside, so always 
 **On `main`** (docs-only changes): `git push`, then watch the run it triggers and report the result:
 
 ```
-gh run watch $(gh run list --branch main --limit 1 --json databaseId --jq '.[0].databaseId') --interval 10
+SHA=$(git rev-parse HEAD)
+until gh run list --commit "$SHA" --json databaseId --jq '.[0].databaseId' | grep -q .; do sleep 3; done
+gh run watch $(gh run list --commit "$SHA" --json databaseId --jq '.[0].databaseId') --interval 10
+gh run list --commit "$SHA" --json conclusion --jq '.[0].conclusion'
 ```
+
+Look the run up **by commit SHA**, and wait for it to appear. `gh run list --limit 1` is a trap: GitHub takes a few seconds to register a new run, so it returns the *previous* commit's run and reports its success as yours.
 
 Never report a push as finished without its CI result. "Pushed" is not "green".
 
