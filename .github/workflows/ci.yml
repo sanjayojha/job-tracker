@@ -1,9 +1,26 @@
 name: CI
 
+# Prose changes cannot break a build, so they do not spend a run. A commit
+# touching both docs and code still runs: paths-ignore only skips when *every*
+# changed file matches. Workflow files are deliberately absent from the list --
+# a change to CI itself must be tested by CI.
+#
+# Safe here only because no status check is required for merging. If branch
+# protection is ever added, a skipped run reports nothing at all and the PR
+# waits forever on a check that will never arrive.
+# The list is duplicated because GitHub Actions does not support YAML anchors.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.claude/**'
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.claude/**'
 
 # A new push to the same branch makes the previous run irrelevant.
 concurrency:
