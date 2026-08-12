@@ -108,7 +108,13 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 
 A commit that only exists locally is unbacked-up work with no upside, so always push.
 
-**On `main`** (docs-only changes): `git push`. CI runs on the push; you are done.
+**On `main`** (docs-only changes): `git push`, then watch the run it triggers and report the result:
+
+```
+gh run watch $(gh run list --branch main --limit 1 --json databaseId --jq '.[0].databaseId') --interval 10
+```
+
+Never report a push as finished without its CI result. "Pushed" is not "green".
 
 **On a branch:** `git push -u origin <branch>`, then **open a PR immediately** — do not wait for the work to feel finished:
 
@@ -132,7 +138,9 @@ gh pr checks <number> --watch --interval 10
 
 If they fail, read the actual log with `gh run view --log-failed` and diagnose it — do not guess and re-push.
 
-**Do not merge.** Report the PR URL and check status, and let the user decide. If they have already said to merge in `$ARGUMENTS`, use `gh pr merge <n> --squash --delete-branch`, then `git checkout main && git pull`.
+**Do not merge.** Report the PR URL and check status, and let the user decide. If they have already said to merge in `$ARGUMENTS`, use `gh pr merge <n> --squash --delete-branch`, then `git checkout main && git pull` — **and watch the run the merge triggers on `main`, using the command above.**
+
+A green PR does not mean `main` is green. The squash commit is a new commit, and if `main` moved while the PR was open its tree is not the tree CI tested. The post-merge run on `main` is the one that says the trunk still works, so merging is not finished until it passes.
 
 **Never force-push.** If a push is rejected, stop and report it rather than forcing or rebasing unasked.
 
