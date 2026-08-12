@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * `status` and `user_id` are deliberately absent from the fillable list.
@@ -50,6 +52,29 @@ class Application extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * The full audit trail, oldest first.
+     *
+     * @return HasMany<ApplicationStatusHistory, $this>
+     */
+    public function statusHistories(): HasMany
+    {
+        return $this->hasMany(ApplicationStatusHistory::class);
+    }
+
+    /**
+     * The most recent transition, which is what staleness is measured from.
+     *
+     * Derived rather than denormalised onto a column: there is exactly one
+     * source of truth for when a status last moved, so nothing can drift.
+     *
+     * @return HasOne<ApplicationStatusHistory, $this>
+     */
+    public function latestStatusChange(): HasOne
+    {
+        return $this->statusHistories()->one()->latestOfMany();
     }
 
     /**

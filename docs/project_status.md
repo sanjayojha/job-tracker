@@ -46,21 +46,23 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 
 - [x] Companies and Applications migrations, models, and factories, with the status pipeline as an enum-backed column
 - [x] `App\Enums\ApplicationStatus` pinned to the SPA's status list by a test that parses `frontend/src/features/applications/status.ts`
+- [x] `application_status_histories` audit table, append-only, cascading from its application
+- [x] `ChangeApplicationStatus` — the single transition funnel — and `CreateApplication`, both firing `ApplicationStatusChanged` after commit
 
 ### Remaining in this phase
-
-- [ ] `ApplicationStatusHistory` audit table
-- [ ] A single status-transition action firing `ApplicationStatusChanged`
 - [ ] `/api/v1` CRUD for companies and applications
 - [ ] Application list UI, sortable by date and status
 - [ ] Dashboard with counts per status
 
 ## What's next
 
-Finish the pipeline's write path: the `ApplicationStatusHistory` table and the single transition action that fires `ApplicationStatusChanged`. That funnel has to exist before the CRUD endpoints, because `status` is deliberately not mass-assignable — creating an application goes through the action too.
+`/api/v1` CRUD for companies and applications. The domain layer beneath it is now in place, so the controllers stay thin: creation and status changes both delegate to the actions rather than touching `status` themselves.
+
+Nothing listens to `ApplicationStatusChanged` yet — dashboard cache invalidation and reminder scheduling are V1. The event is dispatched now so those listeners have a seam to attach to.
 
 ## Known gaps and risks
 
+- **`ChangeApplicationStatus` throws a bare `RuntimeException`** when asked to move an application to the stage it already holds. Harmless while nothing calls it over HTTP, but through a controller that surfaces as a 500 when it is really a client error. **Fix it when the status-change endpoint is built** — either a typed domain exception mapped to 422, or a Form Request rule that rejects the no-op before the action is reached. Left open deliberately: which one is right is an API-layer decision, and the API layer does not exist yet.
 - **Deploy target undecided.** No infrastructure exists. Needs resolving before V1 ships (project_spec.md §9.3).
 - **Documentation drift.** The `docs/` files are maintained by hand. If they fall behind the code, an agent will follow them confidently and be wrong.
 - **`.ddev/` is untracked**, so the environment lives only in `README.md`'s setup steps. Changes to the DDEV config must be mirrored there manually or they are lost.
