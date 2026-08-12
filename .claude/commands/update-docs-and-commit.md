@@ -1,7 +1,7 @@
 ---
 description: Update docs/ and CLAUDE.md to reflect the working-tree changes, then commit and push
 argument-hint: "[optional context, e.g. 'this closes the auth milestone']"
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git ls-files:*), Bash(git branch:*), Read, Edit, Write, Glob, Grep
+allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git ls-files:*), Bash(git branch:*), Bash(git checkout:*), Bash(git switch:*), Bash(gh pr:*), Bash(gh run:*), Read, Edit, Write, Glob, Grep
 ---
 
 ## Current state
@@ -72,7 +72,18 @@ Do **not** add feature descriptions, progress, or history — those belong in th
 
 If nothing in it became false, leave it completely alone. That is the normal case.
 
-### 6. Commit
+### 6. Pick the branch — before committing
+
+If the branch above is **not** `main`, stay on it.
+
+If it **is** `main`, decide which kind of change this is:
+
+- **Code** — anything under `backend/` or `frontend/`, or a change to CI or the DDEV config. Create a branch first: `git checkout -b feature/short-description` (or `fix/...`). CLAUDE.md forbids committing feature work directly to `main`, and doing it here would silently break that rule.
+- **Docs only** — `docs/`, `README.md`, `CLAUDE.md`, `.claude/`, and nothing else. Commit straight to `main`. A branch and PR for a changelog line is friction with no payoff, and there is nothing for CI to catch.
+
+Branch before the commit, not after. Moving a commit off `main` afterwards is recoverable but pointless work.
+
+### 7. Commit
 
 Stage everything with `git add -A`, then verify nothing sensitive is staged:
 
@@ -93,14 +104,38 @@ columns. Mention anything surprising a future reader would trip on.
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 ```
 
-### 7. Push
+### 8. Push, and open a PR if this is on a branch
 
-Push to the current branch's remote. This is a solo repo with no review gate, so a commit that only exists locally is unbacked-up work with no upside.
+A commit that only exists locally is unbacked-up work with no upside, so always push.
 
-- On `main`, `git push` is enough.
-- On a new branch, use `git push -u origin <branch>` to set upstream.
-- **Never force-push.** If the push is rejected, stop and report it rather than forcing or rebasing unasked.
+**On `main`** (docs-only changes): `git push`. CI runs on the push; you are done.
 
-### 8. Report back
+**On a branch:** `git push -u origin <branch>`, then **open a PR immediately** — do not wait for the work to feel finished:
 
-State concisely: which files you changed and why, which you deliberately left alone, and the commit subject. If you chose not to touch `architecture.md` or `CLAUDE.md`, say so — that is a real decision, not an omission.
+```
+gh pr create --base main --head <branch> --title "<commit subject>" --body "..."
+```
+
+This matters mechanically, not ceremonially: `.github/workflows/ci.yml` fires on `push` to `main` and on `pull_request`. A push to a feature branch with no PR open **matches neither trigger and runs nothing**. Until the PR exists, the branch is untested by CI.
+
+Body: why the change exists and any decision a reader should push back on. End it with:
+
+```
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+```
+
+Then wait for the checks and report the result:
+
+```
+gh pr checks <number> --watch --interval 10
+```
+
+If they fail, read the actual log with `gh run view --log-failed` and diagnose it — do not guess and re-push.
+
+**Do not merge.** Report the PR URL and check status, and let the user decide. If they have already said to merge in `$ARGUMENTS`, use `gh pr merge <n> --squash --delete-branch`, then `git checkout main && git pull`.
+
+**Never force-push.** If a push is rejected, stop and report it rather than forcing or rebasing unasked.
+
+### 9. Report back
+
+State concisely: which files you changed and why, which you deliberately left alone, the commit subject, and — if there is one — the PR URL with its CI status. If you chose not to touch `architecture.md` or `CLAUDE.md`, say so — that is a real decision, not an omission.

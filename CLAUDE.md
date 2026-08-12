@@ -147,7 +147,7 @@ Driven by the jobs-to-be-done in [project_spec.md](project_spec.md):
 - **Push after committing.** Solo repo, no review gate — a local-only commit is unbacked-up work. `/update-docs-and-commit` handles this. If a push is rejected, stop and report rather than forcing or rebasing unasked.
 - Git identity for this repo is already configured; don't override it.
 
-GitHub Actions runs the same lint and test steps on every push to `main` and every PR (`.github/workflows/ci.yml`). CI is a backstop, not the feedback loop — run these locally before pushing:
+GitHub Actions runs the same lint and test steps on every push to `main` and every PR (`.github/workflows/ci.yml`). **Pushing a feature branch runs nothing** — the workflow has no `push` trigger for branches other than `main`, so CI only sees the branch once a PR is open. Open the PR when you push, not when the work feels finished. CI is a backstop, not the feedback loop — run these locally before pushing:
 
 ```bash
 ddev artisan test
