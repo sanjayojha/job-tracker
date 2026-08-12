@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-08-10
+**Last updated:** 2026-08-12
 **Project start date:** 2026-08-07
 **Current phase:** Phase 1 — MVP
 **Next target date:** _not set_
@@ -42,10 +42,14 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 
 ## Current phase: Phase 1 — MVP
 
+### Accomplished
+
+- [x] Companies and Applications migrations, models, and factories, with the status pipeline as an enum-backed column
+- [x] `App\Enums\ApplicationStatus` pinned to the SPA's status list by a test that parses `frontend/src/features/applications/status.ts`
+
 ### Remaining in this phase
 
-- [ ] Companies and Applications migrations, models, and factories
-- [ ] Status pipeline as an enum-backed column, with the `ApplicationStatusHistory` audit table
+- [ ] `ApplicationStatusHistory` audit table
 - [ ] A single status-transition action firing `ApplicationStatusChanged`
 - [ ] `/api/v1` CRUD for companies and applications
 - [ ] Application list UI, sortable by date and status
@@ -53,7 +57,7 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 
 ## What's next
 
-Start with the data model — Companies and Applications migrations, the status enum, and the `ApplicationStatusHistory` table — since the API surface and the dashboard both depend on that shape.
+Finish the pipeline's write path: the `ApplicationStatusHistory` table and the single transition action that fires `ApplicationStatusChanged`. That funnel has to exist before the CRUD endpoints, because `status` is deliberately not mass-assignable — creating an application goes through the action too.
 
 ## Known gaps and risks
 
