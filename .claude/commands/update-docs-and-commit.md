@@ -112,12 +112,15 @@ A commit that only exists locally is unbacked-up work with no upside, so always 
 
 ```
 SHA=$(git rev-parse HEAD)
-until gh run list --commit "$SHA" --json databaseId --jq '.[0].databaseId' | grep -q .; do sleep 3; done
-gh run watch $(gh run list --commit "$SHA" --json databaseId --jq '.[0].databaseId') --interval 10
-gh run list --commit "$SHA" --json conclusion --jq '.[0].conclusion'
+until RUN=$(gh run list --commit "$SHA" --json databaseId --jq '.[0].databaseId') && [ -n "$RUN" ]; do sleep 3; done
+gh run watch "$RUN" --exit-status --compact --interval 10 > /dev/null 2>&1
+gh run view "$RUN" | head -7
 ```
 
-Look the run up **by commit SHA**, and wait for it to appear. `gh run list --limit 1` is a trap: GitHub takes a few seconds to register a new run, so it returns the *previous* commit's run and reports its success as yours.
+Two things make this trustworthy:
+
+- **Look the run up by commit SHA, and wait for it to appear.** `gh run list --limit 1` is a trap: GitHub takes a few seconds to register a new run, so it returns the *previous* commit's run and reports that success as yours. `--limit 1` without a filter is worse still — it takes the newest run repo-wide, which may belong to a branch PR.
+- **`--exit-status` makes a red run fail the command** rather than something you have to remember to parse. `gh run view` then prints the per-job breakdown for the report. Note the header does not include the commit, so it cannot itself confirm you watched the right run — that is what the SHA lookup is for.
 
 Never report a push as finished without its CI result. "Pushed" is not "green".
 
