@@ -57,6 +57,7 @@ Things that look reasonable and are wrong here:
 - **`.mcp.json` must invoke `ddev`, not `php`.** `boost:install` writes `"command": "php"`, which cannot work — MCP servers launch as host processes.
 - **React Router is v8, not v7.** Docs and tutorials for v7 mostly still apply to the declarative API, but check before trusting them.
 - **Tailwind is v4, not v3.** Most tutorials describe v3 and will mislead you — see Frontend and design below.
+- **The status list exists twice.** `App\Enums\ApplicationStatus` and `frontend/src/features/applications/status.ts` must stay identical, order included — the SPA needs the values at module scope for its label and colour maps. A unit test parses the TypeScript and fails on drift, so adding a stage means editing both.
 - **The database is PostgreSQL, not MySQL.** String comparison is case-sensitive, and `ILIKE`/`JSONB` differ from MySQL. Don't write MySQL-flavoured SQL.
 - **Tests run against real PostgreSQL, not SQLite.** Never change `phpunit.xml` back to `sqlite`/`:memory:` — a test asserts this, and reverting it would silently stop covering the engine we deploy on.
 - **Session-backed endpoints need an SPA `Origin` header in tests.** Sanctum only starts a session when the request's `Origin`/`Referer` matches `sanctum.stateful`; without it `$request->session()` throws. Use the `fromSpa()` helper in `tests/Pest.php`.
@@ -70,7 +71,7 @@ Laravel Boost exposes live introspection: `database-schema`, `database-query`, `
 ## Backend conventions
 
 - **API-first and versioned.** Everything under `/api/v1/...`. No functionality reachable only through a non-API path.
-- **Status changes go through one action class** that fires `ApplicationStatusChanged`. Never set status directly in a controller — that single funnel is what makes the audit log and reminder logic trustworthy.
+- **Status changes go through one action class** that fires `ApplicationStatusChanged`. Never set status directly in a controller — that single funnel is what makes the audit log and reminder logic trustworthy. `Application`'s `status` and `user_id` are deliberately not fillable so this cannot be bypassed by mass assignment; set them explicitly. Creating an application is the first transition and goes through the action too.
 - **Nothing slow in a request.** Notifications, file post-processing, and future email parsing all go through queued Jobs.
 - **Scheduled commands must be idempotent.** Running the staleness scan twice in a day must not double-send.
 - **Config over hardcoding** for anything tunable (staleness threshold, cache TTLs) and anything environment-specific. Local, staging, and production should differ only by `.env`.
