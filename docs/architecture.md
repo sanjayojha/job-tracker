@@ -49,7 +49,9 @@ The SPA is on `:5173` and the API on `:443`. Different ports are different *orig
 
 **Read path (dashboard):** SPA request → Sanctum session cookie authenticates → controller asks for aggregate stats → Redis cache hit returns immediately; on miss, the aggregate is computed from PostgreSQL, cached, and returned.
 
-**Write path (status change):** SPA `PATCH` → controller delegates to a single status-transition action → action persists the new status, writes an `ApplicationStatusHistory` row, and fires `ApplicationStatusChanged` → listeners invalidate the cached dashboard aggregates and recalculate the reminder schedule. Controllers never set status directly; that funnel is what keeps the audit log trustworthy.
+**Write path (status change):** SPA `PATCH` → controller delegates to a single status-transition action (`App\Actions\ChangeApplicationStatus`) → action persists the new status and writes an `application_status_histories` row in one transaction, then fires `ApplicationStatusChanged` after commit → _planned:_ listeners invalidate the cached dashboard aggregates and recalculate the reminder schedule. Controllers never set status directly; that funnel is what keeps the audit log trustworthy. Creating an application is the first transition and goes through `App\Actions\CreateApplication`, which opens the trail with a null `from_status`.
+
+The event is deliberately `ShouldDispatchAfterCommit`: a listener that invalidates a cache or sends mail must not run for a transition the database rolled back.
 
 **Scheduled path (staleness):** cron runs `schedule:run` daily → the staleness-scan command queries applications with no status change inside the configured threshold → dispatches a reminder Job per application → the worker sends mail and writes a database notification. The scan is idempotent, so running it twice in a day does not double-send.
 

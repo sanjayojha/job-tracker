@@ -12,6 +12,7 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 
 - Companies and applications data model: `companies` (unique name, website, notes) and `applications` (title, status, applied date, source URL, notes), with applications owned by a user and cascading from their company
 - `App\Enums\ApplicationStatus` — the seven-stage pipeline as a backed enum, kept identical to the SPA's status list by a test that reads the TypeScript
+- Status pipeline write path: every status change goes through one action that records an `application_status_histories` row and fires `ApplicationStatusChanged`. Creating an application counts as the first transition, so the trail is never empty. Any stage may follow any other; only a move to the stage already held is refused
 - CI no longer runs for prose-only changes; `**.md`, `docs/**` and `.claude/**` are in `paths-ignore`, while a commit touching both prose and code still runs
 - Design system based on IBM Carbon: Carbon Blue and Gray token scales, IBM Plex Sans and Mono self-hosted via `@fontsource`, Phosphor icons at Light weight, square corners enforced at the token level, and a restrained status-colour vocabulary
 

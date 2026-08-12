@@ -46,18 +46,19 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 
 - [x] Companies and Applications migrations, models, and factories, with the status pipeline as an enum-backed column
 - [x] `App\Enums\ApplicationStatus` pinned to the SPA's status list by a test that parses `frontend/src/features/applications/status.ts`
+- [x] `application_status_histories` audit table, append-only, cascading from its application
+- [x] `ChangeApplicationStatus` — the single transition funnel — and `CreateApplication`, both firing `ApplicationStatusChanged` after commit
 
 ### Remaining in this phase
-
-- [ ] `ApplicationStatusHistory` audit table
-- [ ] A single status-transition action firing `ApplicationStatusChanged`
 - [ ] `/api/v1` CRUD for companies and applications
 - [ ] Application list UI, sortable by date and status
 - [ ] Dashboard with counts per status
 
 ## What's next
 
-Finish the pipeline's write path: the `ApplicationStatusHistory` table and the single transition action that fires `ApplicationStatusChanged`. That funnel has to exist before the CRUD endpoints, because `status` is deliberately not mass-assignable — creating an application goes through the action too.
+`/api/v1` CRUD for companies and applications. The domain layer beneath it is now in place, so the controllers stay thin: creation and status changes both delegate to the actions rather than touching `status` themselves.
+
+Nothing listens to `ApplicationStatusChanged` yet — dashboard cache invalidation and reminder scheduling are V1. The event is dispatched now so those listeners have a seam to attach to.
 
 ## Known gaps and risks
 

@@ -71,7 +71,7 @@ Laravel Boost exposes live introspection: `database-schema`, `database-query`, `
 ## Backend conventions
 
 - **API-first and versioned.** Everything under `/api/v1/...`. No functionality reachable only through a non-API path.
-- **Status changes go through one action class** that fires `ApplicationStatusChanged`. Never set status directly in a controller — that single funnel is what makes the audit log and reminder logic trustworthy. `Application`'s `status` and `user_id` are deliberately not fillable so this cannot be bypassed by mass assignment; set them explicitly. Creating an application is the first transition and goes through the action too.
+- **Status changes go through `App\Actions\ChangeApplicationStatus`**, which fires `ApplicationStatusChanged` after commit. Creation goes through `App\Actions\CreateApplication` — it is the first transition and opens the audit trail with a null `from_status`. Don't add a second path. Never set status directly in a controller — that single funnel is what makes the audit log and reminder logic trustworthy. `Application`'s `status` and `user_id` are deliberately not fillable so this cannot be bypassed by mass assignment; set them explicitly. Creating an application is the first transition and goes through the action too.
 - **Nothing slow in a request.** Notifications, file post-processing, and future email parsing all go through queued Jobs.
 - **Scheduled commands must be idempotent.** Running the staleness scan twice in a day must not double-send.
 - **Config over hardcoding** for anything tunable (staleness threshold, cache TTLs) and anything environment-specific. Local, staging, and production should differ only by `.env`.
