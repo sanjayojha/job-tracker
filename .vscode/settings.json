@@ -1,0 +1,13 @@
+{
+  // Pest binds `$this` to the TestCase at runtime, so state shared through a
+  // `beforeEach` hook -- `$this->action = ...`, the idiom Pest's own docs
+  // recommend -- is invisible to static analysis and reports as an undefined
+  // property. Intelephense has no inline suppression, so the check is off
+  // workspace-wide.
+  //
+  // The cost: a genuine typo'd property name no longer gets flagged. Accepted
+  // because Laravel and Pest lean on runtime-resolved properties throughout,
+  // which makes the check noisy enough to be ignored anyway -- and an ignored
+  // warning is worse than an absent one.
+  "intelephense.diagnostics.undefinedProperties": false
+}

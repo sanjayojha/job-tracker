@@ -140,6 +140,7 @@ Driven by the jobs-to-be-done in [project_spec.md](project_spec.md):
 
 ## Repository etiquette
 
+- **Stop and ask before committing anything under `backend/` or `frontend/`.** Finish the work, run the tests and Pint, summarise what changed — then wait for approval. Sanjay reviews generated code in the editor, where changed files are highlighted in the tree; once it is committed that cue is gone and reviewing means reading a diff. Docs-only changes (`docs/`, `*.md`, `.claude/`) can be committed without asking.
 - **Never commit directly to `main` for feature work.** Branch first: `feature/description` or `fix/description`.
 - **Never force-push to `main`.**
 - Use `/update-docs-and-commit` to commit — it keeps `docs/` in sync with the code.

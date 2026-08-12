@@ -62,6 +62,7 @@ Nothing listens to `ApplicationStatusChanged` yet — dashboard cache invalidati
 
 ## Known gaps and risks
 
+- **`ChangeApplicationStatus` throws a bare `RuntimeException`** when asked to move an application to the stage it already holds. Harmless while nothing calls it over HTTP, but through a controller that surfaces as a 500 when it is really a client error. **Fix it when the status-change endpoint is built** — either a typed domain exception mapped to 422, or a Form Request rule that rejects the no-op before the action is reached. Left open deliberately: which one is right is an API-layer decision, and the API layer does not exist yet.
 - **Deploy target undecided.** No infrastructure exists. Needs resolving before V1 ships (project_spec.md §9.3).
 - **Documentation drift.** The `docs/` files are maintained by hand. If they fall behind the code, an agent will follow them confidently and be wrong.
 - **`.ddev/` is untracked**, so the environment lives only in `README.md`'s setup steps. Changes to the DDEV config must be mirrored there manually or they are lost.

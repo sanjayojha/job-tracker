@@ -85,6 +85,8 @@ Branch before the commit, not after. Moving a commit off `main` afterwards is re
 
 ### 7. Commit
 
+**If anything under `backend/` or `frontend/` changed, stop here and ask first.** Summarise what changed and wait for approval before staging. The user reviews generated code in the editor, where modified files are highlighted in the tree — committing first destroys that cue. Docs-only changesets do not need the gate; commit them.
+
 Stage everything with `git add -A`, then verify nothing sensitive is staged:
 
 ```
