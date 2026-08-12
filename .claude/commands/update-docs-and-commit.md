@@ -108,14 +108,24 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 
 A commit that only exists locally is unbacked-up work with no upside, so always push.
 
-**On `main`** (docs-only changes): `git push`, then watch the run it triggers and report the result:
+**On `main`** (docs-only changes): `git push`. **Expect no CI run** — `ci.yml` ignores `**.md`, `docs/**`, and `.claude/**`, so a prose-only commit deliberately triggers nothing. Say that in the report rather than reporting a green run that does not exist, and do not sit waiting for one.
+
+**After a merge to `main`, or any push to `main` that touches code**, watch the run and report the result:
 
 ```
 SHA=$(git rev-parse HEAD)
-until RUN=$(gh run list --commit "$SHA" --json databaseId --jq '.[0].databaseId') && [ -n "$RUN" ]; do sleep 3; done
-gh run watch "$RUN" --exit-status --compact --interval 10 > /dev/null 2>&1
-gh run view "$RUN" | head -7
+for _ in $(seq 20); do
+  RUN=$(gh run list --commit "$SHA" --json databaseId --jq '.[0].databaseId')
+  [ -n "$RUN" ] && break
+  sleep 3
+done
+if [ -z "$RUN" ]; then echo "No run for $SHA — skipped by paths-ignore?"; else
+  gh run watch "$RUN" --exit-status --compact --interval 10 > /dev/null 2>&1
+  gh run view "$RUN" | head -7
+fi
 ```
+
+The loop is bounded on purpose. An unbounded `until` wait hangs forever on a commit that CI is *supposed* to skip, and an agent staring at a never-arriving run looks identical to one waiting on a slow queue.
 
 Two things make this trustworthy:
 
