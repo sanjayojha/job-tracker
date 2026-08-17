@@ -4,9 +4,9 @@ namespace App\Actions;
 
 use App\Enums\ApplicationStatus;
 use App\Events\ApplicationStatusChanged;
+use App\Exceptions\ApplicationAlreadyAtStatus;
 use App\Models\Application;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 
 /**
  * The single funnel every status change goes through.
@@ -27,7 +27,7 @@ class ChangeApplicationStatus
     /**
      * Move an application to a new stage and record it.
      *
-     * @throws RuntimeException when the application is already at that stage
+     * @throws ApplicationAlreadyAtStatus when the application is already at that stage
      */
     public function handle(
         Application $application,
@@ -37,9 +37,7 @@ class ChangeApplicationStatus
         $from = $application->status;
 
         if ($from === $to) {
-            throw new RuntimeException(
-                "Application {$application->id} is already at status {$to->value}."
-            );
+            throw new ApplicationAlreadyAtStatus($to);
         }
 
         return DB::transaction(function () use ($application, $from, $to, $note) {
