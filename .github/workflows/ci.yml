@@ -90,7 +90,7 @@ jobs:
         run: php artisan test
 
   frontend:
-    name: Frontend (lint + build)
+    name: Frontend (lint + test + build)
     runs-on: ubuntu-latest
 
     defaults:
@@ -111,5 +111,8 @@ jobs:
       - name: Lint (oxlint)
         run: npm run lint
 
-      - name: Build (also typechecks via tsc -b)
+      - name: Test (Vitest)
+        run: npm test
+
+      - name: Build (also typechecks via tsc -b, test files included)
         run: npm run build

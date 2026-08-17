@@ -56,6 +56,7 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 - [x] No-op transitions answer 422 instead of 500, closing the recorded `RuntimeException` gap
 
 - [x] Application list UI at `/applications` — filtering, sorting and pagination, with all list state held in the URL
+- [x] Frontend testing: Vitest + React Testing Library, wired into CI alongside lint and build
 
 ### Remaining in this phase
 - [ ] Create and edit an application from the SPA — the list is read-only, so logging still means calling the API directly. This is where a company combobox is needed, and where adding Radix primitives for that one component should be raised

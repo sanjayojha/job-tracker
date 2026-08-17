@@ -23,6 +23,7 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 
 - Application list screen at `/applications` — a dense table of company, role, status, applied date and how long ago the status last moved, with search over role titles, filters by status and company, sortable columns and pagination. Filters and sort live in the URL, so a view can be bookmarked and the back button works
 - Feature-based frontend structure and a persistent app shell with navigation; `/` redirects to `/applications`
+- Frontend test suite: Vitest with React Testing Library and jsdom, run by `npm test` and in CI. Covers the date helpers and the list screen's behaviour — URL-held filters, sort toggling, the page reset on filter change, and the two empty states
 
 ### Fixed
 
