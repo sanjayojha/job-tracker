@@ -90,3 +90,13 @@ it('requires company names to be unique', function () {
     expect(fn () => Company::factory()->create(['name' => 'Acme']))
         ->toThrow(QueryException::class);
 });
+
+it('requires company names to be unique regardless of case', function () {
+    // Enforced by the companies_name_lower_unique functional index, not by
+    // PostgreSQL's default comparison, which is case-sensitive. UniqueCompanyName
+    // mirrors this so the API answers 422 instead of letting it reach here.
+    Company::factory()->create(['name' => 'Acme']);
+
+    expect(fn () => Company::factory()->create(['name' => 'ACME']))
+        ->toThrow(QueryException::class);
+});

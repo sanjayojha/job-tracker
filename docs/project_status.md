@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-08-12
+**Last updated:** 2026-08-17
 **Project start date:** 2026-08-07
 **Current phase:** Phase 1 — MVP
 **Next target date:** _not set_
@@ -49,20 +49,25 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 - [x] `application_status_histories` audit table, append-only, cascading from its application
 - [x] `ChangeApplicationStatus` — the single transition funnel — and `CreateApplication`, both firing `ApplicationStatusChanged` after commit
 
+- [x] `/api/v1/companies` CRUD, establishing the controller / Form Request / API Resource layering the rest of the API follows
+- [x] Company names made case-insensitively unique, so the same employer cannot appear twice under different casing
+
 ### Remaining in this phase
-- [ ] `/api/v1` CRUD for companies and applications
+- [ ] `/api/v1` CRUD for applications, plus `POST /applications/{id}/status` for transitions
 - [ ] Application list UI, sortable by date and status
 - [ ] Dashboard with counts per status
 
 ## What's next
 
-`/api/v1` CRUD for companies and applications. The domain layer beneath it is now in place, so the controllers stay thin: creation and status changes both delegate to the actions rather than touching `status` themselves.
+`/api/v1` CRUD for applications. Companies settled the shape — thin controller, Form Requests for validation, an API Resource for the wire format — so applications follow it, delegating to `CreateApplication` rather than touching `status` themselves.
+
+Transitions get their own endpoint, `POST /applications/{id}/status`, rather than being accepted by the resource `PATCH`, which will reject `status` outright: the single-funnel rule is easier to hold to when it is visible in the URL space. That endpoint is also where the `RuntimeException` gap below gets closed.
 
 Nothing listens to `ApplicationStatusChanged` yet — dashboard cache invalidation and reminder scheduling are V1. The event is dispatched now so those listeners have a seam to attach to.
 
 ## Known gaps and risks
 
-- **`ChangeApplicationStatus` throws a bare `RuntimeException`** when asked to move an application to the stage it already holds. Harmless while nothing calls it over HTTP, but through a controller that surfaces as a 500 when it is really a client error. **Fix it when the status-change endpoint is built** — either a typed domain exception mapped to 422, or a Form Request rule that rejects the no-op before the action is reached. Left open deliberately: which one is right is an API-layer decision, and the API layer does not exist yet.
+- **`ChangeApplicationStatus` throws a bare `RuntimeException`** when asked to move an application to the stage it already holds. Harmless while nothing calls it over HTTP, but through a controller that surfaces as a 500 when it is really a client error. **Fix it when `POST /applications/{id}/status` is built** — either a typed domain exception mapped to 422, or a Form Request rule that rejects the no-op before the action is reached. Still open only because nothing calls the action over HTTP yet; the next piece of work closes it.
 - **Deploy target undecided.** No infrastructure exists. Needs resolving before V1 ships (project_spec.md §9.3).
 - **Documentation drift.** The `docs/` files are maintained by hand. If they fall behind the code, an agent will follow them confidently and be wrong.
 - **`.ddev/` is untracked**, so the environment lives only in `README.md`'s setup steps. Changes to the DDEV config must be mirrored there manually or they are lost.
