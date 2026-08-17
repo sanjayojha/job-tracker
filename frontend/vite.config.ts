@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -30,5 +31,16 @@ export default defineConfig({
       protocol: router?.protocol === 'https:' ? 'wss' : 'ws',
       clientPort: 5173,
     },
+  },
+  test: {
+    // jsdom, not the real browser: these tests are about component behaviour
+    // -- what renders, what a click does -- not layout or CSS. Browser-level
+    // checks stay manual against the running app.
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './src/test/setup.ts',
+    // Vitest would otherwise treat the built output as source and try to run
+    // anything test-shaped inside it.
+    exclude: ['node_modules', 'dist'],
   },
 })

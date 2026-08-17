@@ -135,6 +135,8 @@ Driven by the jobs-to-be-done in [project_spec.md](project_spec.md):
 - TypeScript strict mode. No `any` without a comment justifying it.
 - Format backend with `ddev composer exec pint` before committing.
 - Lint frontend with `ddev exec --dir /var/www/html/frontend npm run lint`.
+- **Frontend tests are Vitest + React Testing Library**, run with `npm test` (`test:watch` while working). Test files sit beside what they test as `*.test.ts(x)`; `src/test/` holds the setup and the `renderWithProviders` helper, which supplies the Router and Query providers a component needs. Query behaviour through the rendered UI — `getByRole`, not implementation details. `tsconfig.app.json` includes `src`, so tests are type-checked by `npm run build` too.
+- **Date helpers compare local calendar days, not UTC instants.** A test that pins a UTC timestamp passes or fails depending on the machine's timezone — build both the frozen clock and the input with `new Date(y, m, d, h)` so the assertion is about behaviour, not location.
 - Match surrounding code. Check sibling files for structure and naming before inventing a pattern.
 
 **Dependencies:** minimise. Prefer Laravel-native features over packages — the point is to demonstrate and understand the framework's own queues, events, scheduling, and notifications. Don't add a dependency without asking.
@@ -156,7 +158,8 @@ GitHub Actions runs the same lint and test steps on every push to `main` and eve
 ```bash
 ddev artisan test
 ddev exec --dir /var/www/html/frontend npm run lint
-ddev exec --dir /var/www/html/frontend npm run build   # catches type errors
+ddev exec --dir /var/www/html/frontend npm test        # Vitest, single run
+ddev exec --dir /var/www/html/frontend npm run build   # catches type errors, tests included
 ```
 
 When CI fails, read the actual log — `gh` is installed and authenticated. Diagnose from the log rather than guessing and re-pushing:
