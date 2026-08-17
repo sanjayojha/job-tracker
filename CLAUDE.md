@@ -58,6 +58,7 @@ Things that look reasonable and are wrong here:
 - **React Router is v8, not v7.** Docs and tutorials for v7 mostly still apply to the declarative API, but check before trusting them.
 - **Tailwind is v4, not v3.** Most tutorials describe v3 and will mislead you — see Frontend and design below.
 - **The status list exists twice.** `App\Enums\ApplicationStatus` and `frontend/src/features/applications/status.ts` must stay identical, order included — the SPA needs the values at module scope for its label and colour maps. A unit test parses the TypeScript and fails on drift, so adding a stage means editing both.
+- **`unique:companies,name` is the wrong rule.** Company names are unique _case-insensitively_, via a functional index on `lower(name)`. Laravel's `unique` rule compares with `=`, which PostgreSQL evaluates case-sensitively, so it would let "acme" through and the insert would then 500. Use `App\Rules\UniqueCompanyName`.
 - **The database is PostgreSQL, not MySQL.** String comparison is case-sensitive, and `ILIKE`/`JSONB` differ from MySQL. Don't write MySQL-flavoured SQL.
 - **Tests run against real PostgreSQL, not SQLite.** Never change `phpunit.xml` back to `sqlite`/`:memory:` — a test asserts this, and reverting it would silently stop covering the engine we deploy on.
 - **Session-backed endpoints need an SPA `Origin` header in tests.** Sanctum only starts a session when the request's `Origin`/`Referer` matches `sanctum.stateful`; without it `$request->session()` throws. Use the `fromSpa()` helper in `tests/Pest.php`.

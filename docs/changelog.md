@@ -13,6 +13,8 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - Companies and applications data model: `companies` (unique name, website, notes) and `applications` (title, status, applied date, source URL, notes), with applications owned by a user and cascading from their company
 - `App\Enums\ApplicationStatus` — the seven-stage pipeline as a backed enum, kept identical to the SPA's status list by a test that reads the TypeScript
 - Status pipeline write path: every status change goes through one action that records an `application_status_histories` row and fires `ApplicationStatusChanged`. Creating an application counts as the first transition, so the trail is never empty. Any stage may follow any other; only a move to the stage already held is refused
+- `/api/v1/companies` CRUD — list (alphabetical, each with its application count), create, show, update and delete. The list is deliberately unpaginated so the SPA's company picker can filter the whole set client-side. Deleting a company that still has applications is refused with a `409` rather than cascading them away
+- Company names are unique case-insensitively, enforced by a functional index on `lower(name)` and mirrored by a validation rule so the API answers `422` instead of `500`. The name is stored with the casing that was typed
 - CI no longer runs for prose-only changes; `**.md`, `docs/**` and `.claude/**` are in `paths-ignore`, while a commit touching both prose and code still runs
 - Design system based on IBM Carbon: Carbon Blue and Gray token scales, IBM Plex Sans and Mono self-hosted via `@fontsource`, Phosphor icons at Light weight, square corners enforced at the token level, and a restrained status-colour vocabulary
 
