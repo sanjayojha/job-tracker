@@ -1,7 +1,8 @@
 import { SignOutIcon } from '@phosphor-icons/react'
-import { Route, Routes } from 'react-router'
+import { Navigate, NavLink, Route, Routes } from 'react-router'
 import { RequireAuth } from './features/auth/RequireAuth'
 import { useLogout, useUser } from './features/auth/api'
+import { ApplicationsPage } from './features/applications/ApplicationsPage'
 
 function AppShell({ children }: { children: React.ReactNode }) {
   const { data: user } = useUser()
@@ -11,7 +12,19 @@ function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-ink-10">
       <header className="border-b border-ink-20 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-          <span className="font-semibold tracking-tight text-ink-100">Job Tracker</span>
+          <div className="flex items-center gap-6">
+            <span className="font-semibold tracking-tight text-ink-100">Job Tracker</span>
+            <nav className="flex items-center gap-1">
+              <NavLink
+                to="/applications"
+                className={({ isActive }) =>
+                  `px-2 py-1 ${isActive ? 'border-b-2 border-brand-60 text-ink-100' : 'text-ink-70 hover:text-ink-100'}`
+                }
+              >
+                Applications
+              </NavLink>
+            </nav>
+          </div>
           <div className="flex items-center gap-4">
             <span className="text-ink-60">{user?.email}</span>
             <button
@@ -32,27 +45,18 @@ function AppShell({ children }: { children: React.ReactNode }) {
   )
 }
 
-function Dashboard() {
-  const { data: user } = useUser()
-
-  return (
-    <AppShell>
-      <h1 className="text-lg font-semibold tracking-tight text-ink-100">
-        Signed in as {user?.name}
-      </h1>
-      <p className="mt-1 text-ink-70">
-        Authentication is wired end to end. Applications and the status pipeline come next.
-      </p>
-    </AppShell>
-  )
-}
-
 export default function App() {
   return (
     <RequireAuth>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-      </Routes>
+      <AppShell>
+        <Routes>
+          {/* The list is the app's home for now. `/` stays free for the
+              dashboard, which is a later piece of work. */}
+          <Route path="/" element={<Navigate to="/applications" replace />} />
+          <Route path="/applications" element={<ApplicationsPage />} />
+          <Route path="*" element={<Navigate to="/applications" replace />} />
+        </Routes>
+      </AppShell>
     </RequireAuth>
   )
 }

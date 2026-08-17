@@ -157,6 +157,19 @@ class ApplicationController extends Controller implements HasMiddleware
      */
     private function applySort(Builder $query, string $sort, string $direction): void
     {
+        $descending = $direction !== 'asc';
+
+        if ($sort === 'applied_at') {
+            // NULLS LAST in both directions. PostgreSQL puts nulls first on a
+            // DESC sort, which would head the list with wishlist entries that
+            // have no applied date -- the rows least likely to be what someone
+            // sorting by date is looking for.
+            $query->orderByRaw('applied_at '.($descending ? 'DESC' : 'ASC').' NULLS LAST')
+                ->orderBy('id', $direction);
+
+            return;
+        }
+
         if ($sort !== 'status') {
             $query->orderBy($sort, $direction)->orderBy('id', $direction);
 

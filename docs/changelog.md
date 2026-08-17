@@ -21,8 +21,12 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - CI no longer runs for prose-only changes; `**.md`, `docs/**` and `.claude/**` are in `paths-ignore`, while a commit touching both prose and code still runs
 - Design system based on IBM Carbon: Carbon Blue and Gray token scales, IBM Plex Sans and Mono self-hosted via `@fontsource`, Phosphor icons at Light weight, square corners enforced at the token level, and a restrained status-colour vocabulary
 
+- Application list screen at `/applications` — a dense table of company, role, status, applied date and how long ago the status last moved, with search over role titles, filters by status and company, sortable columns and pagination. Filters and sort live in the URL, so a view can be bookmarked and the back button works
+- Feature-based frontend structure and a persistent app shell with navigation; `/` redirects to `/applications`
+
 ### Fixed
 
+- Applications with no applied date sort last in a date-ordered list, in both directions. PostgreSQL orders nulls first on a descending sort, which put undated wishlist entries at the top of the list
 - Moving an application to the stage it already holds answers `422` keyed to `status` rather than surfacing the transition action's refusal as a `500`
 
 ## [0.1.0] - 2026-08-10

@@ -135,6 +135,20 @@ describe('index', function () {
         expect($response->json('data.*.title'))->toBe(['Newer', 'Older']);
     });
 
+    it('sorts undated applications last, in both directions', function (string $direction) {
+        // PostgreSQL puts nulls first on a DESC sort, which would head a
+        // date-sorted list with wishlist entries that have no applied date.
+        $user = User::factory()->create();
+        Application::factory()->for($user)->wishlist()->create(['title' => 'Undated']);
+        Application::factory()->for($user)->create(['applied_at' => '2026-01-01', 'title' => 'Older']);
+        Application::factory()->for($user)->create(['applied_at' => '2026-06-01', 'title' => 'Newer']);
+
+        $response = $this->actingAs($user)
+            ->getJson("/api/v1/applications?sort=applied_at&direction={$direction}");
+
+        expect($response->json('data.2.title'))->toBe('Undated');
+    })->with(['asc', 'desc']);
+
     it('rejects a sort column that is not allow-listed', function () {
         // `sort` reaches an orderBy, so it has to be a closed set.
         $this->actingAs(User::factory()->create())
