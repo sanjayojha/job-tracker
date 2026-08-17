@@ -57,7 +57,8 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 
 ### Remaining in this phase
 - [ ] Application list UI, sortable by date and status
-- [ ] Dashboard with counts per status
+- [ ] Dashboard with counts per status — **deferred until after the list UI**. Note that no endpoint exists yet: this is a backend task (an aggregate endpoint under `/api/v1`, Redis-cached per `architecture.md`'s read path) followed by a UI one, not UI work alone
+- [ ] Deployment target — in the MVP checklist in [brainstorm.md](../brainstorm.md) but not previously tracked here. To be decided after the list UI; it can force changes to the queue driver, session store and asset build
 
 ## What's next
 
