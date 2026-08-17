@@ -164,6 +164,32 @@ A green PR does not mean `main` is green. The squash commit is a new commit, and
 
 **Never force-push.** If a push is rejected, stop and report it rather than forcing or rebasing unasked.
 
+#### Merging a stack, in order
+
+When one PR is based on another branch rather than on `main` — check with `gh pr view <n> --json baseRefName` — **retarget the child to `main` before merging the parent**:
+
+```
+gh pr edit <child> --base main
+gh pr merge <parent> --squash --delete-branch
+```
+
+Doing it the other way round loses the child PR. `--delete-branch` removes the base branch, and **GitHub auto-closes any PR whose base branch is deleted**. The close is silent, and it is not reversible in place: a closed PR refuses a base change with `Cannot change the base branch of a closed pull request`, so the review thread, its description, and its check history are gone.
+
+If it already happened, do **not** force-push or rebase the orphaned branch. Branch fresh off the updated `main`, cherry-pick the child's commit onto it, re-run the suite, and open a new PR:
+
+```
+git checkout -b <branch>-v2 main
+git cherry-pick <child-commit-sha>
+```
+
+The cherry-pick usually applies cleanly, because the parent's content is already in `main` — the same tree arrived by a different commit. Then delete the orphaned remote branch once its content is merged, so nobody branches off a dead end:
+
+```
+git push origin --delete <orphaned-branch>
+```
+
+Prefer not to stack at all unless the second piece genuinely cannot be reviewed without the first. Two PRs both based on `main` have none of this failure mode.
+
 ### 9. Report back
 
 State concisely: which files you changed and why, which you deliberately left alone, the commit subject, and — if there is one — the PR URL with its CI status. If you chose not to touch `architecture.md` or `CLAUDE.md`, say so — that is a real decision, not an omission.
