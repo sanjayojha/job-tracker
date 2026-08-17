@@ -4,6 +4,7 @@ use App\Actions\ChangeApplicationStatus;
 use App\Actions\CreateApplication;
 use App\Enums\ApplicationStatus;
 use App\Events\ApplicationStatusChanged;
+use App\Exceptions\ApplicationAlreadyAtStatus;
 use App\Models\Application;
 use App\Models\ApplicationStatusHistory;
 use App\Models\Company;
@@ -46,8 +47,10 @@ it('fires ApplicationStatusChanged carrying both stages', function () {
 it('refuses a move to the stage it is already at', function () {
     $application = Application::factory()->create(['status' => ApplicationStatus::Offer]);
 
+    // The specific type matters: it is what renders as a 422 rather than a
+    // 500, so a bare RuntimeException here would let that regress unnoticed.
     expect(fn () => $this->action->handle($application, ApplicationStatus::Offer))
-        ->toThrow(RuntimeException::class);
+        ->toThrow(ApplicationAlreadyAtStatus::class);
 
     // Nothing recorded: history should only ever say something happened.
     expect($application->statusHistories()->count())->toBe(0);

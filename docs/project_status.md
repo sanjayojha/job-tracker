@@ -51,23 +51,24 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 
 - [x] `/api/v1/companies` CRUD, establishing the controller / Form Request / API Resource layering the rest of the API follows
 - [x] Company names made case-insensitively unique, so the same employer cannot appear twice under different casing
+- [x] `/api/v1/applications` CRUD, scoped to the authenticated user by `ApplicationPolicy`, with status/company/search filtering, pipeline-ordered sorting and pagination
+- [x] `POST /applications/{id}/status` — the single transition endpoint; the resource `PATCH` refuses a `status` key
+- [x] No-op transitions answer 422 instead of 500, closing the recorded `RuntimeException` gap
 
 ### Remaining in this phase
-- [ ] `/api/v1` CRUD for applications, plus `POST /applications/{id}/status` for transitions
 - [ ] Application list UI, sortable by date and status
 - [ ] Dashboard with counts per status
 
 ## What's next
 
-`/api/v1` CRUD for applications. Companies settled the shape — thin controller, Form Requests for validation, an API Resource for the wire format — so applications follow it, delegating to `CreateApplication` rather than touching `status` themselves.
+The SPA. The API is complete enough to build against: the application list has filtering, sorting and pagination behind it, and the dashboard's counts per status are the last backend piece.
 
-Transitions get their own endpoint, `POST /applications/{id}/status`, rather than being accepted by the resource `PATCH`, which will reject `status` outright: the single-funnel rule is easier to hold to when it is visible in the URL space. That endpoint is also where the `RuntimeException` gap below gets closed.
+The list UI comes first, because it is what replaces the spreadsheet. It reads `GET /api/v1/applications` directly — sorting and filtering are query parameters, not client-side work, so the list stays correct once it is longer than a page.
 
 Nothing listens to `ApplicationStatusChanged` yet — dashboard cache invalidation and reminder scheduling are V1. The event is dispatched now so those listeners have a seam to attach to.
 
 ## Known gaps and risks
 
-- **`ChangeApplicationStatus` throws a bare `RuntimeException`** when asked to move an application to the stage it already holds. Harmless while nothing calls it over HTTP, but through a controller that surfaces as a 500 when it is really a client error. **Fix it when `POST /applications/{id}/status` is built** — either a typed domain exception mapped to 422, or a Form Request rule that rejects the no-op before the action is reached. Still open only because nothing calls the action over HTTP yet; the next piece of work closes it.
 - **Deploy target undecided.** No infrastructure exists. Needs resolving before V1 ships (project_spec.md §9.3).
 - **Documentation drift.** The `docs/` files are maintained by hand. If they fall behind the code, an agent will follow them confidently and be wrong.
 - **`.ddev/` is untracked**, so the environment lives only in `README.md`'s setup steps. Changes to the DDEV config must be mirrored there manually or they are lost.

@@ -15,8 +15,15 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - Status pipeline write path: every status change goes through one action that records an `application_status_histories` row and fires `ApplicationStatusChanged`. Creating an application counts as the first transition, so the trail is never empty. Any stage may follow any other; only a move to the stage already held is refused
 - `/api/v1/companies` CRUD — list (alphabetical, each with its application count), create, show, update and delete. The list is deliberately unpaginated so the SPA's company picker can filter the whole set client-side. Deleting a company that still has applications is refused with a `409` rather than cascading them away
 - Company names are unique case-insensitively, enforced by a functional index on `lower(name)` and mirrored by a validation rule so the API answers `422` instead of `500`. The name is stored with the casing that was typed
+- `/api/v1/applications` CRUD, scoped to the authenticated user — list with filtering by status, company and title search, sorting, and pagination; create, show, update and delete. Sorting by status follows pipeline order rather than the alphabetical order of the stored values, and title search is case-insensitive
+- `POST /api/v1/applications/{id}/status` — the only way to move an application's stage over HTTP, recording the transition and an optional note. The resource `PATCH` refuses a `status` key outright and says where to send it, rather than silently ignoring it
+- `GET /api/v1/applications/{id}` returns the full status history, oldest first
 - CI no longer runs for prose-only changes; `**.md`, `docs/**` and `.claude/**` are in `paths-ignore`, while a commit touching both prose and code still runs
 - Design system based on IBM Carbon: Carbon Blue and Gray token scales, IBM Plex Sans and Mono self-hosted via `@fontsource`, Phosphor icons at Light weight, square corners enforced at the token level, and a restrained status-colour vocabulary
+
+### Fixed
+
+- Moving an application to the stage it already holds answers `422` keyed to `status` rather than surfacing the transition action's refusal as a `500`
 
 ## [0.1.0] - 2026-08-10
 
