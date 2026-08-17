@@ -59,6 +59,8 @@ Things that look reasonable and are wrong here:
 - **Tailwind is v4, not v3.** Most tutorials describe v3 and will mislead you — see Frontend and design below.
 - **The status list exists twice.** `App\Enums\ApplicationStatus` and `frontend/src/features/applications/status.ts` must stay identical, order included — the SPA needs the values at module scope for its label and colour maps. A unit test parses the TypeScript and fails on drift, so adding a stage means editing both.
 - **`unique:companies,name` is the wrong rule.** Company names are unique _case-insensitively_, via a functional index on `lower(name)`. Laravel's `unique` rule compares with `=`, which PostgreSQL evaluates case-sensitively, so it would let "acme" through and the insert would then 500. Use `App\Rules\UniqueCompanyName`.
+- **`Application::factory()->create()` writes no audit trail.** It sets the `status` column directly, bypassing `CreateApplication`, so `statusHistories` is empty and `status_changed_at` comes back null. Fine when the test is about the row; wrong when it is about history, staleness or "when did this last move" — build those through the action or the API. This has produced two false test failures already.
+- **`application_status_histories.created_at` is not fillable.** The model is append-only with `UPDATED_AT = null`, so `update(['created_at' => ...])` is silently dropped by mass-assignment guarding and the row keeps `now()`. Backdate through the query builder (`DB::table(...)->update(...)`) when seeding.
 - **The database is PostgreSQL, not MySQL.** String comparison is case-sensitive, and `ILIKE`/`JSONB` differ from MySQL. Don't write MySQL-flavoured SQL.
 - **Tests run against real PostgreSQL, not SQLite.** Never change `phpunit.xml` back to `sqlite`/`:memory:` — a test asserts this, and reverting it would silently stop covering the engine we deploy on.
 - **Session-backed endpoints need an SPA `Origin` header in tests.** Sanctum only starts a session when the request's `Origin`/`Referer` matches `sanctum.stateful`; without it `$request->session()` throws. Use the `fromSpa()` helper in `tests/Pest.php`.
@@ -190,6 +192,7 @@ Test coverage is required on the three things most likely to break silently: **s
 - [brainstorm.md](brainstorm.md) — scope boundaries, MVP/V1/V2 split, what's explicitly out
 - [docs/architecture.md](docs/architecture.md) — system design and data flow
 - [docs/project_status.md](docs/project_status.md) — current phase, what's done, what's next
+- [docs/next-session-brief.md](docs/next-session-brief.md) — **temporary** handoff note for the next piece of work. Delete it once that work lands; `project_status.md` is the durable record
 - [docs/changelog.md](docs/changelog.md) — visible changes
 - [README.md](README.md) — setup and environment reproduction
 
