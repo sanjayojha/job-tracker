@@ -82,7 +82,11 @@ They share a repo for context and tooling convenience, not a runtime. Each deplo
 
 Server state lives entirely in the Query cache; there is no separate client-state store, because almost nothing in this app is client-only state. The cache invalidation on the client mirrors the Redis invalidation on the server — a mutation that changes an application's status must invalidate both the application list and the dashboard aggregates, or the two layers disagree.
 
-_Planned:_ route structure and component organisation are established when the first real screens land.
+Routes are declared in `src/App.tsx` inside a persistent `AppShell`, so the header and navigation are not remounted on navigation. `/` redirects to `/applications`, leaving `/` free for the dashboard.
+
+Components are organised by feature, not by type: `src/features/<feature>/` holds that feature's hooks (`api.ts`), its screens and its own components, while `src/components/` is reserved for genuinely shared pieces. Each feature's `api.ts` owns a `*Keys` object that is the single source of truth for its cache keys, so a mutation cannot invalidate a key that has drifted from the one a query registered.
+
+**List state lives in the URL, not in React state.** Filters, sort and page are read from and written to the query string, which makes a filtered view bookmarkable, keeps the back button meaningful, and means a reload does not silently discard the filters someone is looking at. Since filtering, sorting and pagination are all server-side, the query string is also very nearly the API request — there is no second, client-side copy of the query to keep in step.
 
 ### API Layers
 

@@ -55,16 +55,18 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 - [x] `POST /applications/{id}/status` — the single transition endpoint; the resource `PATCH` refuses a `status` key
 - [x] No-op transitions answer 422 instead of 500, closing the recorded `RuntimeException` gap
 
+- [x] Application list UI at `/applications` — filtering, sorting and pagination, with all list state held in the URL
+
 ### Remaining in this phase
-- [ ] Application list UI, sortable by date and status
+- [ ] Create and edit an application from the SPA — the list is read-only, so logging still means calling the API directly. This is where a company combobox is needed, and where adding Radix primitives for that one component should be raised
 - [ ] Dashboard with counts per status — **deferred until after the list UI**. Note that no endpoint exists yet: this is a backend task (an aggregate endpoint under `/api/v1`, Redis-cached per `architecture.md`'s read path) followed by a UI one, not UI work alone
 - [ ] Deployment target — in the MVP checklist in [brainstorm.md](../brainstorm.md) but not previously tracked here. To be decided after the list UI; it can force changes to the queue driver, session store and asset build
 
 ## What's next
 
-The SPA. The API is complete enough to build against: the application list has filtering, sorting and pagination behind it, and the dashboard's counts per status are the last backend piece.
+Creating and editing an application from the SPA. The list can be read but nothing can be logged without calling the API by hand, which is the gap between "the screen exists" and "this replaces the spreadsheet".
 
-The list UI comes first, because it is what replaces the spreadsheet. It reads `GET /api/v1/applications` directly — sorting and filtering are query parameters, not client-side work, so the list stays correct once it is longer than a page.
+That screen is also where the component-library decision gets tested: the company picker is a combobox, which is the first component genuinely hard to build accessibly by hand. `CLAUDE.md` sanctions adding Radix primitives for that one piece rather than adopting a library — raise it there rather than assuming either way.
 
 Nothing listens to `ApplicationStatusChanged` yet — dashboard cache invalidation and reminder scheduling are V1. The event is dispatched now so those listeners have a seam to attach to.
 
