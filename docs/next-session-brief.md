@@ -1,24 +1,33 @@
 # Next session brief
 
-**Written:** 2026-08-18, after the create screen and the application detail screen landed.
+**Written:** 2026-08-18, after the SPA's application write surface was completed.
 
 A handoff note, not a permanent document. **Delete it once the work below is done** — [project_status.md](project_status.md) is the durable record of what is next, and two files answering the same question is how one of them goes stale and gets believed anyway.
 
 ## Where things stand
 
-Phase 1's backend is complete. The SPA can list, create, read and move applications through the pipeline; only field editing and the dashboard remain.
+**The application write surface is complete** — log, read, move, edit. Every endpoint the API exposes for applications and companies is reachable from the SPA, so the spreadsheet is genuinely replaceable for daily use. Only the dashboard remains in Phase 1.
 
-Landed: the create screen at `/applications/new` with the company combobox (#9), then the detail screen at `/applications/{id}` with the stage control and the visible audit trail. The component-library question is closed — see `CLAUDE.md`.
+Landed: the create screen with the company combobox (#9), the detail screen with the stage control and visible audit trail (#10), and inline field editing (#11). The component-library question is closed — see `CLAUDE.md`.
 
 ## The next piece of work
 
-**Edit an application's fields from the SPA.** `PATCH /api/v1/applications/{id}` is the one remaining endpoint the SPA does not use. It takes `company_id`, `title`, `applied_at`, `source_url` and `notes`, treats an absent key as "leave alone" and an explicit null as "clear", and **rejects a `status` key with a 422** — stage moves go through the status endpoint, which the detail screen already uses.
+**The dashboard** — the last MVP feature, and unlike everything above it, there is no endpoint waiting. This is backend work first:
 
-The detail screen at `/applications/{id}` is where this belongs. It renders those fields read-only today.
+1. An aggregate endpoint under `/api/v1` returning counts per status for the authenticated user. One query, not seven.
+2. Cached in Redis per [architecture.md](architecture.md)'s read path, with a config-driven TTL rather than a hardcoded one.
+3. Then the screen at `/`, which has been kept free for it — `/` currently redirects to `/applications`.
 
-**Reuse the create form's fields rather than building a second set.** `NewApplicationPage` and the edit form want the same company combobox, title, date, URL and notes inputs with the same validation display; extract them into a component both render. Doing it twice is how the two drift.
+Two things to settle before writing it:
 
-Worth deciding: whether editing is an inline mode on the detail screen or its own route. Inline avoids a navigation step and keeps the history in view.
+- **What the dashboard is for.** Counts per status are the stated MVP scope, but the tool's whole premise is surfacing what has gone quiet. A grid of seven numbers may be less useful than "these three have not moved in two weeks" — staleness is `attention-*`, the only colour allowed to shout. Worth deciding deliberately rather than building counts because the checklist says counts.
+- **Whether `ApplicationStatusChanged` invalidates the cache now or later.** The event fires after commit with nothing listening, and this is the listener it was designed for. Doing it now means the cache is correct; leaving it means a TTL-shaped staleness window. `project_status.md` currently files the listener as V1.
+
+**The deploy target is the other open item** and is the one that can cause rework rather than just remaining — it decides the queue driver, session store and asset build.
+
+## Convention worth knowing before touching the forms
+
+`ApplicationCoreFields` and `ApplicationOptionalFields` (`ApplicationFields.tsx`) are shared by the create screen and the detail screen's edit mode. Change them and both screens change — that is the point. `applicationFields.ts` alongside holds the value types and `changedFields`, which builds the PATCH body from the difference; a cleared optional field must send `null`, never `''`.
 
 ### After that
 

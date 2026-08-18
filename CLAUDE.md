@@ -95,6 +95,8 @@ Laravel Boost exposes live introspection: `database-schema`, `database-query`, `
 
 **Component files must export only components** — oxlint's fast-refresh rule fails otherwise. Constants, types, and style maps go in a sibling `.ts` file.
 
+**Application form inputs live in `ApplicationFields.tsx`** and are shared by the create screen and the detail screen's edit mode. Add a field there, not to one screen. `applicationFields.ts` alongside holds the value types and `changedFields`, which builds a `PATCH` body from the difference — a cleared optional field must send `null`, never `''`, or it fails the `url`/`date` rules instead of clearing the column.
+
 **Visual style:** a dense internal tool, not a marketing site. The data is the interface. Modern but enterprise — think IBM, not a startup landing page.
 
 The design system is **IBM Carbon**, chosen deliberately: it is built around square corners, flat fills and restrained colour, which is exactly the brief. **Tokens live in `frontend/src/index.css` under `@theme` and are the source of truth** — this section states the rules, that file holds the values.

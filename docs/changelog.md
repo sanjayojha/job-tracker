@@ -29,6 +29,7 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - Application detail screen at `/applications/{id}`, reached from the role title in the list — the application's company, role, applied date, posting link and notes on one page
 - The status history is visible for the first time. Every move an application has made is shown newest first, with the note recorded against it and the opening entry marked as the stage it was logged at. The trail has been written since the transition action landed; nothing in the app displayed it until now
 - Applications can be moved between stages from the SPA, with an optional note saying why, which is stored on the audit row. The control will not offer a move to the stage already held, and the list's status and "last moved" columns update to match
+- An application's fields can be edited inline on its detail screen — company, role title, applied date, posting URL and notes. Only changed fields are sent, and clearing an optional one clears it rather than failing validation. The stage is not editable here by design: moves go through the stage control so they are recorded in the history
 - Test coverage for the API client: CSRF cookie handling, the URL-decoded `X-XSRF-TOKEN` header, session credentials, `204` responses and `ApiError` field errors — the first write path through it made this worth pinning down
 
 ### Changed

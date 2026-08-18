@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-08-18 (detail screen and stage control)
+**Last updated:** 2026-08-18 (application write surface complete)
 **Project start date:** 2026-08-07
 **Current phase:** Phase 1 — MVP
 **Next target date:** _not set_
@@ -64,16 +64,21 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 
 - [x] Application detail screen at `/applications/{id}`, linked from the list, with the stage control and the status history — the audit trail is visible in the app for the first time. Verified in a browser, including the audit row the move writes
 
+- [x] Edit an application's fields inline on the detail screen, sending only what changed. The create form's inputs are shared by both screens as `ApplicationCoreFields` / `ApplicationOptionalFields`, so the two cannot drift
+
+**The application write surface is complete: log, read, move, edit.** Every endpoint the API exposes for applications and companies is now reachable from the SPA.
+
 ### Remaining in this phase
-- [ ] Edit an application's fields from the SPA. `PATCH /applications/{id}` exists and is still unused; the detail screen shows the fields but cannot change them. Reuse the create form's field layout rather than building a second one
 - [ ] Dashboard with counts per status — **deferred until after the list UI**. Note that no endpoint exists yet: this is a backend task (an aggregate endpoint under `/api/v1`, Redis-cached per `architecture.md`'s read path) followed by a UI one, not UI work alone
 - [ ] Deployment target — in the MVP checklist in [brainstorm.md](../brainstorm.md) but not previously tracked here. To be decided after the list UI; it can force changes to the queue driver, session store and asset build
 
 ## What's next
 
-Editing an application's fields. The pipeline itself is now complete in the SPA — applications can be logged, read, and moved between stages, with the trail visible — so the spreadsheet is genuinely replaceable for day-to-day use. What remains is correcting a typo or filling in a date after the fact, which still means calling `PATCH /applications/{id}` by hand.
+**The dashboard** — the last MVP feature, and the only remaining one with no API behind it. This is a backend task before it is a UI one: an aggregate endpoint under `/api/v1` returning counts per status, cached in Redis per `architecture.md`'s read path, and then the screen at `/`, which has been kept free for it.
 
-After that the dashboard is the last MVP feature, and it is a backend task first: no aggregate endpoint exists yet.
+`ApplicationStatusChanged` already fires after commit with nothing listening. Dashboard cache invalidation is the first listener it was designed for, so this is where that seam finally gets used — though the listener itself may be V1 work rather than MVP.
+
+**The deploy target is the other open item**, and it is the one that can cause rework rather than just remaining. It decides the queue driver, session store and asset build, so the longer it stays open the more of the above is provisional.
 
 Nothing listens to `ApplicationStatusChanged` yet — dashboard cache invalidation and reminder scheduling are V1. The event is dispatched now so those listeners have a seam to attach to.
 
