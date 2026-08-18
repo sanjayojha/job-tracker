@@ -149,6 +149,42 @@ export function useChangeStatus(id: number) {
 }
 
 /**
+ * Updates an application's fields.
+ *
+ * The body is only what changed -- see `changedFields`. A `status` key would
+ * be rejected with a 422 naming the status endpoint, which is the point: the
+ * audit trail cannot be bypassed by a field edit.
+ */
+export function useUpdateApplication(id: number) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (changes: Record<string, unknown>) => {
+      const { data } = await apiFetch<{ data: Application }>(`/applications/${id}`, {
+        method: 'PATCH',
+        body: changes,
+      })
+      return data
+    },
+    onSuccess: (application) => {
+      // PATCH does not load the status history, so writing the response
+      // straight into the detail cache would blank the trail the screen is
+      // showing. Keep the history that is already cached.
+      queryClient.setQueryData<Application>(applicationKeys.detail(id), (current) => ({
+        ...application,
+        status_history: application.status_history ?? current?.status_history,
+      }))
+
+      // A retitled or recompanied application belongs in different filtered
+      // and sorted views than it did a moment ago.
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[1] === 'list',
+      })
+    },
+  })
+}
+
+/**
  * What the create form sends. Only `company_id` and `title` are required --
  * the 30-second rule is enforced by the shape of this type, not by hoping the
  * form stays short.
