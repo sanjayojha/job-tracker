@@ -211,3 +211,110 @@ describe('when the application cannot be loaded', () => {
     expect(await screen.findByText('Could not load this application')).toBeInTheDocument()
   })
 })
+
+describe('editing the fields', () => {
+  /** Opens edit mode from the detail screen, as a person would. */
+  async function startEditing(user: ReturnType<typeof userEvent.setup>) {
+    await screen.findByRole('heading', { name: 'Senior Backend Engineer' })
+    await user.click(screen.getByRole('button', { name: 'Edit' }))
+    await screen.findByRole('heading', { name: 'Edit details' })
+  }
+
+  /** The body of the PATCH, if one was sent. */
+  function patchBody() {
+    const call = mockedFetch.mock.calls.find(
+      ([path, options]) => path === '/applications/42' && options?.method === 'PATCH',
+    )
+
+    return call?.[1]?.body as Record<string, unknown> | undefined
+  }
+
+  it('sends only the field that changed', async () => {
+    const { user } = renderDetail()
+    await startEditing(user)
+
+    mockedFetch.mockResolvedValue({ data: application({ title: 'Staff Engineer' }) })
+
+    await user.clear(screen.getByLabelText('Role title'))
+    await user.type(screen.getByLabelText('Role title'), 'Staff Engineer')
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+    await waitFor(() => expect(patchBody()).toEqual({ title: 'Staff Engineer' }))
+    // Back to the read view, showing the saved value.
+    expect(await screen.findByRole('heading', { name: 'Details' })).toBeInTheDocument()
+  })
+
+  it('clears an emptied field with null rather than an empty string', async () => {
+    const { user } = renderDetail()
+    await startEditing(user)
+
+    mockedFetch.mockResolvedValue({ data: application({ source_url: null }) })
+
+    await user.clear(screen.getByLabelText('Job posting URL'))
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+    await waitFor(() => expect(patchBody()).toEqual({ source_url: null }))
+  })
+
+  it('does not send a request when nothing was changed', async () => {
+    const { user } = renderDetail()
+    await startEditing(user)
+
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+    // An empty PATCH would succeed and bump updated_at for no reason.
+    await screen.findByRole('heading', { name: 'Details' })
+    expect(patchBody()).toBeUndefined()
+  })
+
+  it('keeps the status history visible after an edit', async () => {
+    const { user } = renderDetail()
+    await startEditing(user)
+
+    // PATCH does not load the trail, so the response has no status_history.
+    mockedFetch.mockResolvedValue({
+      data: { ...application({ title: 'Staff Engineer' }), status_history: undefined },
+    })
+
+    await user.clear(screen.getByLabelText('Role title'))
+    await user.type(screen.getByLabelText('Role title'), 'Staff Engineer')
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+    await screen.findByRole('heading', { name: 'Details' })
+    // Writing the response straight into the cache would blank the history
+    // the screen is showing.
+    const entries = within(screen.getByRole('list')).getAllByRole('listitem')
+    expect(entries).toHaveLength(2)
+  })
+
+  it('discards the edits on cancel', async () => {
+    const { user } = renderDetail()
+    await startEditing(user)
+
+    await user.clear(screen.getByLabelText('Role title'))
+    await user.type(screen.getByLabelText('Role title'), 'Something else')
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    expect(await screen.findByRole('heading', { name: 'Senior Backend Engineer' })).toBeInTheDocument()
+    expect(patchBody()).toBeUndefined()
+  })
+
+  it('shows a server-side 422 against the field it belongs to', async () => {
+    const { user } = renderDetail()
+    await startEditing(user)
+
+    mockedFetch.mockRejectedValue(
+      new ApiError(422, 'The given data was invalid.', {
+        source_url: ['The source url field must be a valid URL.'],
+      }),
+    )
+
+    await user.clear(screen.getByLabelText('Job posting URL'))
+    await user.type(screen.getByLabelText('Job posting URL'), 'not-a-url')
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+
+    expect(await screen.findByText('The source url field must be a valid URL.')).toBeInTheDocument()
+    // Still editing, with the typed value intact.
+    expect(screen.getByLabelText('Job posting URL')).toHaveValue('not-a-url')
+  })
+})
