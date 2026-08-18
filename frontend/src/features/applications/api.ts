@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../../lib/api'
 import type { ApplicationStatus } from './status'
 
@@ -83,5 +83,39 @@ export function useApplications(filters: ApplicationFilters) {
     // blank out and the layout would jump on each keystroke of the search box;
     // holding the previous page keeps the list readable while the next loads.
     placeholderData: keepPreviousData,
+  })
+}
+
+/**
+ * What the create form sends. Only `company_id` and `title` are required --
+ * the 30-second rule is enforced by the shape of this type, not by hoping the
+ * form stays short.
+ */
+export type NewApplication = {
+  company_id: number
+  title: string
+  status?: ApplicationStatus
+  applied_at?: string
+  source_url?: string
+  notes?: string
+}
+
+export function useCreateApplication() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (application: NewApplication) => {
+      const { data } = await apiFetch<{ data: Application }>('/applications', {
+        method: 'POST',
+        body: application,
+      })
+      return data
+    },
+    onSuccess: () => {
+      // Every list is now wrong: the new row belongs in some of them, and the
+      // filters and sort decide which. Invalidating the branch is cheaper to
+      // reason about than working out where it lands.
+      queryClient.invalidateQueries({ queryKey: applicationKeys.all })
+    },
   })
 }

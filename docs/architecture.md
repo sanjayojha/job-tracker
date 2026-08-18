@@ -77,7 +77,7 @@ They share a repo for context and tooling convenience, not a runtime. Each deplo
 - **Phosphor icons** at Light weight, imported with the `Icon` suffix.
 - **React Router 8** in declarative mode — client-side routing only, no loaders or framework features.
 - **TanStack Query 5** over native `fetch` for all server state. Providers are wired in `src/main.tsx`.
-- **No component library.** Components are hand-built on Tailwind, so accessibility is on us.
+- **No component library**, with one exception. Components are hand-built on Tailwind, so accessibility is on us. The exception is **Downshift**, whose `useCombobox` drives the company picker: it owns `aria-activedescendant`, the keyboard navigation, the id wiring between input, listbox and options, and the live region announcing results. It is a headless hook — every element and class is still ours — and it is scoped to that one component, not a general licence to add UI packages.
 - Served in development from Vite on `:5173`, published through ddev-router. The API sits on `:443` of the same host; cookies are not port-scoped, so the Sanctum session cookie works across that split.
 
 Server state lives entirely in the Query cache; there is no separate client-state store, because almost nothing in this app is client-only state. The cache invalidation on the client mirrors the Redis invalidation on the server — a mutation that changes an application's status must invalidate both the application list and the dashboard aggregates, or the two layers disagree.

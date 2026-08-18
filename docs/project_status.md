@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-08-17
+**Last updated:** 2026-08-18
 **Project start date:** 2026-08-07
 **Current phase:** Phase 1 — MVP
 **Next target date:** _not set_
@@ -58,21 +58,26 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 - [x] Application list UI at `/applications` — filtering, sorting and pagination, with all list state held in the URL
 - [x] Frontend testing: Vitest + React Testing Library, wired into CI alongside lint and build
 
+- [x] Create an application from the SPA at `/applications/new` — company and role title required, everything else behind a disclosure, verified end to end in a browser including the audit trail the create writes
+- [x] Company picker: type-to-filter combobox with inline company creation, built on Downshift's `useCombobox` for keyboard and screen-reader behaviour. This closes the component-library question — one headless hook for this component, no library
+- [x] `lib/api.ts` covered by tests: CSRF handling, session credentials, `204`s and `ApiError` field errors
+
 ### Remaining in this phase
-- [ ] Create and edit an application from the SPA — the list is read-only, so logging still means calling the API directly. This is where a company combobox is needed, and where adding Radix primitives for that one component should be raised
+- [ ] Edit an existing application from the SPA, and move its stage. `PATCH /applications/{id}` and `POST /applications/{id}/status` both exist and are unused by the SPA; the list has no row-level link into a detail or edit view yet
 - [ ] Dashboard with counts per status — **deferred until after the list UI**. Note that no endpoint exists yet: this is a backend task (an aggregate endpoint under `/api/v1`, Redis-cached per `architecture.md`'s read path) followed by a UI one, not UI work alone
 - [ ] Deployment target — in the MVP checklist in [brainstorm.md](../brainstorm.md) but not previously tracked here. To be decided after the list UI; it can force changes to the queue driver, session store and asset build
 
 ## What's next
 
-Creating and editing an application from the SPA. The list can be read but nothing can be logged without calling the API by hand, which is the gap between "the screen exists" and "this replaces the spreadsheet".
+Editing an application, and moving its stage, from the SPA. Logging one now works, so the spreadsheet can be replaced for new entries — but an application can still only be corrected or advanced by calling the API by hand, and the stage moving is the pipeline's whole point.
 
-That screen is also where the component-library decision gets tested: the company picker is a combobox, which is the first component genuinely hard to build accessibly by hand. `CLAUDE.md` sanctions adding Radix primitives for that one piece rather than adopting a library — raise it there rather than assuming either way.
+The API needs nothing new for it: `PATCH /applications/{id}` covers the fields and refuses `status`, and `POST /applications/{id}/status` is the one transition endpoint. The open question is the shape of the UI — whether rows link to a detail screen that shows the status history, or the list edits in place.
 
 Nothing listens to `ApplicationStatusChanged` yet — dashboard cache invalidation and reminder scheduling are V1. The event is dispatched now so those listeners have a seam to attach to.
 
 ## Known gaps and risks
 
 - **Deploy target undecided.** No infrastructure exists. Needs resolving before V1 ships (project_spec.md §9.3).
+- **No database seeder for development data.** The dev database's applications and companies were created ad hoc through `tinker`; only the user account is seeded. A `migrate:fresh` destroys them with no way back. Anything seeded must go through `CreateApplication`, or it will have no audit trail.
 - **Documentation drift.** The `docs/` files are maintained by hand. If they fall behind the code, an agent will follow them confidently and be wrong.
 - **`.ddev/` is untracked**, so the environment lives only in `README.md`'s setup steps. Changes to the DDEV config must be mirrored there manually or they are lost.
