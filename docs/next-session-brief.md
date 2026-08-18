@@ -1,35 +1,24 @@
 # Next session brief
 
-**Written:** 2026-08-18, at the end of the session that shipped the create-application screen.
+**Written:** 2026-08-18, after the create screen and the application detail screen landed.
 
 A handoff note, not a permanent document. **Delete it once the work below is done** — [project_status.md](project_status.md) is the durable record of what is next, and two files answering the same question is how one of them goes stale and gets believed anyway.
 
 ## Where things stand
 
-Phase 1's backend is complete. The SPA can now list and create applications, but not change one.
+Phase 1's backend is complete. The SPA can list, create, read and move applications through the pipeline; only field editing and the dashboard remain.
 
-Landed this session: the create screen at `/applications/new`, the company combobox with inline creation, and tests for `lib/api.ts`. The component-library question is closed — see `CLAUDE.md`.
+Landed: the create screen at `/applications/new` with the company combobox (#9), then the detail screen at `/applications/{id}` with the stage control and the visible audit trail. The component-library question is closed — see `CLAUDE.md`.
 
 ## The next piece of work
 
-**Edit an application, and move its stage, from the SPA.** Both endpoints exist and neither is used yet:
+**Edit an application's fields from the SPA.** `PATCH /api/v1/applications/{id}` is the one remaining endpoint the SPA does not use. It takes `company_id`, `title`, `applied_at`, `source_url` and `notes`, treats an absent key as "leave alone" and an explicit null as "clear", and **rejects a `status` key with a 422** — stage moves go through the status endpoint, which the detail screen already uses.
 
-| Need | Endpoint |
-| --- | --- |
-| Edit fields | `PATCH /api/v1/applications/{id}` — **rejects** a `status` key with a 422 |
-| Move stage | `POST /api/v1/applications/{id}/status` — takes `status` and an optional `note` |
-| History | `GET /api/v1/applications/{id}` returns the full trail, oldest first |
+The detail screen at `/applications/{id}` is where this belongs. It renders those fields read-only today.
 
-### The decision waiting to be made
+**Reuse the create form's fields rather than building a second set.** `NewApplicationPage` and the edit form want the same company combobox, title, date, URL and notes inputs with the same validation display; extract them into a component both render. Doing it twice is how the two drift.
 
-**Where editing lives.** The list has no row-level link yet, so this is an open UI question rather than a fill-in-the-blanks task:
-
-- A detail screen at `/applications/{id}` — room for the status history and the note on each move, which nothing currently surfaces, at the cost of a navigation step.
-- Editing in place from the list — faster, but there is nowhere natural to show the trail.
-
-The stage control is the more valuable half: moving an application through the pipeline is the tool's whole point, and it is the one write that has an audit trail behind it. Consider shipping the stage move before the field editing.
-
-Reuse the create form's field layout rather than inventing a second one; if both screens end up sharing it, extract the fields into a component both render.
+Worth deciding: whether editing is an inline mode on the detail screen or its own route. Inline avoids a navigation step and keeps the history in view.
 
 ### After that
 

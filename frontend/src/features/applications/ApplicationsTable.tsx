@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { ArrowDownIcon, ArrowUpIcon } from '@phosphor-icons/react'
 import { StatusBadge } from '../../components/StatusBadge'
 import { daysSince, formatDate, formatRelativeDays } from '../../lib/dates'
@@ -73,7 +74,17 @@ export function ApplicationsTable({ applications, sort, direction, onSort }: Pro
             return (
               <tr key={application.id} className="border-b border-ink-20 last:border-b-0 hover:bg-ink-10">
                 <td className="px-3 py-2 text-ink-70">{application.company?.name ?? '—'}</td>
-                <td className="px-3 py-2 font-medium text-ink-100">{application.title}</td>
+                <td className="px-3 py-2 font-medium">
+                  {/* The role is the row's handle. A link rather than a
+                      clickable row: it is keyboard-reachable, and it can be
+                      opened in a new tab like any other link. */}
+                  <Link
+                    to={`/applications/${application.id}`}
+                    className="text-ink-100 underline decoration-ink-30 underline-offset-2 hover:decoration-brand-60"
+                  >
+                    {application.title}
+                  </Link>
+                </td>
                 <td className="px-3 py-2">
                   <StatusBadge status={application.status} />
                 </td>

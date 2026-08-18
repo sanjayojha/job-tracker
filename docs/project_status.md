@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-08-18
+**Last updated:** 2026-08-18 (detail screen and stage control)
 **Project start date:** 2026-08-07
 **Current phase:** Phase 1 — MVP
 **Next target date:** _not set_
@@ -62,16 +62,18 @@ Scope for each phase is defined in [brainstorm.md](../brainstorm.md); the MVP an
 - [x] Company picker: type-to-filter combobox with inline company creation, built on Downshift's `useCombobox` for keyboard and screen-reader behaviour. This closes the component-library question — one headless hook for this component, no library
 - [x] `lib/api.ts` covered by tests: CSRF handling, session credentials, `204`s and `ApiError` field errors
 
+- [x] Application detail screen at `/applications/{id}`, linked from the list, with the stage control and the status history — the audit trail is visible in the app for the first time. Verified in a browser, including the audit row the move writes
+
 ### Remaining in this phase
-- [ ] Edit an existing application from the SPA, and move its stage. `PATCH /applications/{id}` and `POST /applications/{id}/status` both exist and are unused by the SPA; the list has no row-level link into a detail or edit view yet
+- [ ] Edit an application's fields from the SPA. `PATCH /applications/{id}` exists and is still unused; the detail screen shows the fields but cannot change them. Reuse the create form's field layout rather than building a second one
 - [ ] Dashboard with counts per status — **deferred until after the list UI**. Note that no endpoint exists yet: this is a backend task (an aggregate endpoint under `/api/v1`, Redis-cached per `architecture.md`'s read path) followed by a UI one, not UI work alone
 - [ ] Deployment target — in the MVP checklist in [brainstorm.md](../brainstorm.md) but not previously tracked here. To be decided after the list UI; it can force changes to the queue driver, session store and asset build
 
 ## What's next
 
-Editing an application, and moving its stage, from the SPA. Logging one now works, so the spreadsheet can be replaced for new entries — but an application can still only be corrected or advanced by calling the API by hand, and the stage moving is the pipeline's whole point.
+Editing an application's fields. The pipeline itself is now complete in the SPA — applications can be logged, read, and moved between stages, with the trail visible — so the spreadsheet is genuinely replaceable for day-to-day use. What remains is correcting a typo or filling in a date after the fact, which still means calling `PATCH /applications/{id}` by hand.
 
-The API needs nothing new for it: `PATCH /applications/{id}` covers the fields and refuses `status`, and `POST /applications/{id}/status` is the one transition endpoint. The open question is the shape of the UI — whether rows link to a detail screen that shows the status history, or the list edits in place.
+After that the dashboard is the last MVP feature, and it is a backend task first: no aggregate endpoint exists yet.
 
 Nothing listens to `ApplicationStatusChanged` yet — dashboard cache invalidation and reminder scheduling are V1. The event is dispatched now so those listeners have a seam to attach to.
 
