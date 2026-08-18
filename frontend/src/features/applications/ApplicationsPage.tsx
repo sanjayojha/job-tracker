@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
-import { useSearchParams } from 'react-router'
-import { WarningCircleIcon } from '@phosphor-icons/react'
+import { Link, useSearchParams } from 'react-router'
+import { PlusIcon, WarningCircleIcon } from '@phosphor-icons/react'
 import { Pagination } from '../../components/Pagination'
 import { ApplicationFilters } from './ApplicationFilters'
 import { ApplicationsTable } from './ApplicationsTable'
@@ -85,11 +85,20 @@ export function ApplicationsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-baseline justify-between gap-4">
-        <h1 className="text-lg font-semibold tracking-tight text-ink-100">Applications</h1>
-        {/* Only while refetching over existing data -- the first load has its
-            own state below, and showing both would say the same thing twice. */}
-        {isFetching && !isPending && <span className="text-ink-50">Updating…</span>}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-baseline gap-3">
+          <h1 className="text-lg font-semibold tracking-tight text-ink-100">Applications</h1>
+          {/* Only while refetching over existing data -- the first load has its
+              own state below, and showing both would say the same thing twice. */}
+          {isFetching && !isPending && <span className="text-ink-50">Updating…</span>}
+        </div>
+        <Link
+          to="/applications/new"
+          className="inline-flex items-center gap-1.5 bg-brand-60 px-3 py-1.5 font-medium text-white hover:bg-brand-70"
+        >
+          <PlusIcon weight="light" size={16} />
+          Log application
+        </Link>
       </div>
 
       <ApplicationFilters
@@ -132,6 +141,15 @@ export function ApplicationsPage() {
               ? 'Try a different status, company, or search term.'
               : 'Applications you log will appear here.'}
           </p>
+          {!hasFilters && (
+            <Link
+              to="/applications/new"
+              className="mt-3 inline-flex items-center gap-1.5 bg-brand-60 px-3 py-1.5 font-medium text-white hover:bg-brand-70"
+            >
+              <PlusIcon weight="light" size={16} />
+              Log your first application
+            </Link>
+          )}
           {hasFilters && (
             <button
               type="button"

@@ -3,6 +3,7 @@ import { Navigate, NavLink, Route, Routes } from 'react-router'
 import { RequireAuth } from './features/auth/RequireAuth'
 import { useLogout, useUser } from './features/auth/api'
 import { ApplicationsPage } from './features/applications/ApplicationsPage'
+import { NewApplicationPage } from './features/applications/NewApplicationPage'
 
 function AppShell({ children }: { children: React.ReactNode }) {
   const { data: user } = useUser()
@@ -54,6 +55,7 @@ export default function App() {
               dashboard, which is a later piece of work. */}
           <Route path="/" element={<Navigate to="/applications" replace />} />
           <Route path="/applications" element={<ApplicationsPage />} />
+          <Route path="/applications/new" element={<NewApplicationPage />} />
           <Route path="*" element={<Navigate to="/applications" replace />} />
         </Routes>
       </AppShell>

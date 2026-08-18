@@ -24,6 +24,13 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - Application list screen at `/applications` — a dense table of company, role, status, applied date and how long ago the status last moved, with search over role titles, filters by status and company, sortable columns and pagination. Filters and sort live in the URL, so a view can be bookmarked and the back button works
 - Feature-based frontend structure and a persistent app shell with navigation; `/` redirects to `/applications`
 - Frontend test suite: Vitest with React Testing Library and jsdom, run by `npm test` and in CI. Covers the date helpers and the list screen's behaviour — URL-held filters, sort toggling, the page reset on filter change, and the two empty states
+- Applications can be logged from the SPA at `/applications/new`, reached from the list header and its empty state. Company and role title are the only required fields; the opening stage defaults to Wishlist, and applied date, posting URL and notes sit behind a "More details" disclosure so the common path stays two fields long
+- Company picker with type-to-filter search and inline creation — a company that does not exist yet can be added from within the form without losing what has been typed. Filtering is client-side against the unpaginated company list, and a name that already exists in any casing is never offered for creation
+- Test coverage for the API client: CSRF cookie handling, the URL-decoded `X-XSRF-TOKEN` header, session credentials, `204` responses and `ApiError` field errors — the first write path through it made this worth pinning down
+
+### Changed
+
+- The no-component-library rule now has one exception: Downshift's `useCombobox` provides the company picker's keyboard and screen-reader behaviour. Radix had been held in reserve for this component but ships no combobox primitive, so the accessibility risk it was reserved against — `aria-activedescendant`, arrow-key navigation, result announcements — is covered by a headless hook instead. Markup and styling remain hand-written, and no other component library is adopted
 
 ### Fixed
 

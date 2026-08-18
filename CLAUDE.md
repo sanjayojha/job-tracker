@@ -65,6 +65,9 @@ Things that look reasonable and are wrong here:
 - **Tests run against real PostgreSQL, not SQLite.** Never change `phpunit.xml` back to `sqlite`/`:memory:` — a test asserts this, and reverting it would silently stop covering the engine we deploy on.
 - **Session-backed endpoints need an SPA `Origin` header in tests.** Sanctum only starts a session when the request's `Origin`/`Referer` matches `sanctum.stateful`; without it `$request->session()` throws. Use the `fromSpa()` helper in `tests/Pest.php`.
 - **`auth:sanctum` calls `shouldUse('sanctum')`.** After a request through it, a bare `assertGuest()` inspects the sanctum guard, not the session one — assert `assertGuest('web')` when testing logout.
+- **Downshift's `items` and `selectedItem` must be memoised.** It compares both by identity, so rebuilding the array or the selected object inline on each render reads as a change on each render and the component never settles — the test run hangs rather than failing, which looks like a stuck machine, not a bug. `useMemo` them.
+- **A Downshift option that isn't a real selection needs a `stateReducer`.** Downshift recomputes the input text from `itemToString` _after_ `onSelectedItemChange` returns, so a `setInputValue` in that handler is silently overwritten. `CompanyCombobox`'s "Add «name»" option keeps its text through the reducer for this reason.
+- **A hung `ddev exec` outlives host-side `timeout` or `pkill`.** The real process keeps running inside the container and host `pkill` answers "Permission denied". Kill it with `ddev exec "kill -9 <pid>"`, found via `ddev exec "ps -eo pid,etime,cmd | grep node"` — leaving the `node .../bin/vite` daemon alone.
 - **Don't add `force="true"` to `phpunit.xml`'s `<env>` entries.** CI overrides `DB_HOST` with a real environment variable because DDEV's `db` hostname doesn't exist there; `force="true"` would break that override and fail every CI run.
 
 ## Use Boost's MCP tools
@@ -109,7 +112,9 @@ The design system is **IBM Carbon**, chosen deliberately: it is built around squ
 
 **No component library — this is a deliberate decision, not an omission.** Build components by hand with plain Tailwind. Don't propose shadcn/ui, Mantine, or MUI.
 
-The known cost is accessibility: focus trapping, keyboard navigation, and ARIA on dropdowns, modals, and comboboxes are easy to get wrong by hand. When building one, handle Escape and outside-click to close, trap focus inside modals, make everything keyboard-reachable, and label controls. If a component gets genuinely hard, raise adding Radix primitives for that one piece rather than adopting a whole library.
+The known cost is accessibility: focus trapping, keyboard navigation, and ARIA on dropdowns, modals, and comboboxes are easy to get wrong by hand. When building one, handle Escape and outside-click to close, trap focus inside modals, make everything keyboard-reachable, and label controls.
+
+**The one exception is Downshift**, whose `useCombobox` drives `CompanyCombobox`. It is a headless hook — all markup and classes are still ours. Note that **Radix ships no combobox primitive** (checked at 1.6.7 and the 1.7 RC), so the older plan of "reach for Radix if a component gets hard" cannot be followed for this shape of component. If another component gets genuinely hard, raise it — reuse Downshift where it fits rather than adding a third UI dependency.
 
 ## UX principles
 
