@@ -4,6 +4,7 @@ import { RequireAuth } from './features/auth/RequireAuth'
 import { useLogout, useUser } from './features/auth/api'
 import { ApplicationsPage } from './features/applications/ApplicationsPage'
 import { NewApplicationPage } from './features/applications/NewApplicationPage'
+import { ApplicationDetailPage } from './features/applications/ApplicationDetailPage'
 
 function AppShell({ children }: { children: React.ReactNode }) {
   const { data: user } = useUser()
@@ -56,6 +57,8 @@ export default function App() {
           <Route path="/" element={<Navigate to="/applications" replace />} />
           <Route path="/applications" element={<ApplicationsPage />} />
           <Route path="/applications/new" element={<NewApplicationPage />} />
+          {/* After /new, so the literal segment is not swallowed by :id. */}
+          <Route path="/applications/:id" element={<ApplicationDetailPage />} />
           <Route path="*" element={<Navigate to="/applications" replace />} />
         </Routes>
       </AppShell>

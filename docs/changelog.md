@@ -26,6 +26,9 @@ Entries describe **user- or developer-visible changes**, not individual commits 
 - Frontend test suite: Vitest with React Testing Library and jsdom, run by `npm test` and in CI. Covers the date helpers and the list screen's behaviour — URL-held filters, sort toggling, the page reset on filter change, and the two empty states
 - Applications can be logged from the SPA at `/applications/new`, reached from the list header and its empty state. Company and role title are the only required fields; the opening stage defaults to Wishlist, and applied date, posting URL and notes sit behind a "More details" disclosure so the common path stays two fields long
 - Company picker with type-to-filter search and inline creation — a company that does not exist yet can be added from within the form without losing what has been typed. Filtering is client-side against the unpaginated company list, and a name that already exists in any casing is never offered for creation
+- Application detail screen at `/applications/{id}`, reached from the role title in the list — the application's company, role, applied date, posting link and notes on one page
+- The status history is visible for the first time. Every move an application has made is shown newest first, with the note recorded against it and the opening entry marked as the stage it was logged at. The trail has been written since the transition action landed; nothing in the app displayed it until now
+- Applications can be moved between stages from the SPA, with an optional note saying why, which is stored on the audit row. The control will not offer a move to the stage already held, and the list's status and "last moved" columns update to match
 - Test coverage for the API client: CSRF cookie handling, the URL-decoded `X-XSRF-TOKEN` header, session credentials, `204` responses and `ApiError` field errors — the first write path through it made this worth pinning down
 
 ### Changed

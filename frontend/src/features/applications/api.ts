@@ -19,8 +19,19 @@ export type Application = {
   company?: Company
   /** When the status last moved. Null only for rows with no audit trail. */
   status_changed_at?: string | null
+  /** The full trail, oldest first. Only the show endpoint loads it. */
+  status_history?: StatusHistoryEntry[]
   created_at: string
   updated_at: string
+}
+
+/** One row of the audit trail. `from_status` is null on the opening row. */
+export type StatusHistoryEntry = {
+  id: number
+  from_status: ApplicationStatus | null
+  to_status: ApplicationStatus
+  note: string | null
+  created_at: string
 }
 
 export type PaginationMeta = {
@@ -57,6 +68,7 @@ export type ApplicationFilters = {
 export const applicationKeys = {
   all: ['applications'] as const,
   list: (filters: ApplicationFilters) => ['applications', 'list', filters] as const,
+  detail: (id: number) => ['applications', 'detail', id] as const,
 }
 
 function toQueryString(filters: ApplicationFilters): string {
@@ -83,6 +95,56 @@ export function useApplications(filters: ApplicationFilters) {
     // blank out and the layout would jump on each keystroke of the search box;
     // holding the previous page keeps the list readable while the next loads.
     placeholderData: keepPreviousData,
+  })
+}
+
+/**
+ * One application with its company and full status history. This is the only
+ * endpoint that returns the trail, so it is the only place the audit view can
+ * be built from.
+ */
+export function useApplication(id: number) {
+  return useQuery({
+    queryKey: applicationKeys.detail(id),
+    queryFn: async () => {
+      const { data } = await apiFetch<{ data: Application }>(`/applications/${id}`)
+      return data
+    },
+  })
+}
+
+/**
+ * Moves an application to another stage.
+ *
+ * This is the only way to change a status over HTTP -- the resource PATCH
+ * refuses a `status` key -- so every move made here is recorded in the trail.
+ * A move to the stage already held answers 422; the caller renders that
+ * message rather than treating it as a failure of the request.
+ */
+export function useChangeStatus(id: number) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ status, note }: { status: ApplicationStatus; note?: string }) => {
+      const { data } = await apiFetch<{ data: Application }>(`/applications/${id}/status`, {
+        method: 'POST',
+        body: note ? { status, note } : { status },
+      })
+      return data
+    },
+    onSuccess: (application) => {
+      // The response already carries the new state and the appended trail, so
+      // write it straight into the detail cache instead of refetching what was
+      // just returned.
+      queryClient.setQueryData(applicationKeys.detail(id), application)
+
+      // The lists are a different matter: a status change moves this row
+      // between filtered views and changes its "last moved" column, and the
+      // dashboard aggregates it feeds are cached in Redis server-side.
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[1] === 'list',
+      })
+    },
   })
 }
 
